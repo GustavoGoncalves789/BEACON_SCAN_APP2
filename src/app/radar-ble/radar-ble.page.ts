@@ -366,6 +366,7 @@ export class RadarBlePage {
       this.ble.scan([], 5).subscribe(device => {
         console.log(device);
         const convertedData = this.convertAdvertisingData(device.advertising);
+        let batteryVoltage = this.batteryPorcentage_adv(device.advertising);
         // const dataNumbersParse = this.advertisingDataParsed
         const convertedDevice = {
           name: device.name,
@@ -373,6 +374,7 @@ export class RadarBlePage {
           rssi: device.rssi,
 
           advertisingData: convertedData,
+          battery: batteryVoltage.batteryVoltage,
           // advertisingDataParsed: dataNumbersParse,
 
         };
@@ -382,6 +384,18 @@ export class RadarBlePage {
       });
     } 
   }
+
+  batteryPorcentage_adv(data: ArrayBuffer): { batteryVoltage: number } {
+    const dataView = new DataView(data);
+
+    // Extract battery voltage values from positions 22 and 23
+    const batteryValue = (dataView.getUint8(22) * 256) + dataView.getUint8(23);
+
+    // Convert millivolts to volts
+    const batteryVoltage = batteryValue / 1000;
+
+    return { batteryVoltage };
+}
 
   convertAdvertisingData(data: ArrayBuffer): string {
     const dataView = new DataView(data);
