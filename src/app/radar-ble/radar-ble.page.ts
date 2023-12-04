@@ -364,15 +364,25 @@ export class RadarBlePage {
       });
     } else {
       this.ble.scan([], 5).subscribe(device => {
-        console.log(device);
+        // console.log(device);
+
         const convertedData = this.convertAdvertisingData(device.advertising);
+        const arrayToHex = this.convertAdvertisingDataHex(device.advertising);
+        
+        let batteryPorcentage = this.batteryPorcentage_adv(device.advertising);
+
+        let comma_count = (String(convertedData).match(/ /g) || []).length;
         // const dataNumbersParse = this.advertisingDataParsed
         const convertedDevice = {
           name: device.name,
           id: device.id,
           rssi: device.rssi,
 
-          advertisingData: convertedData,
+          // advertisingData: convertedData,
+          advertisingDataDecimal: convertedData , //JSON.stringify(convertedData, null, 2)
+          advertasingDataHex: arrayToHex,
+          batteryPercentage: batteryPorcentage.batteryVoltage,
+          comma_count: comma_count,
           // advertisingDataParsed: dataNumbersParse,
 
         };
@@ -383,12 +393,50 @@ export class RadarBlePage {
     } 
   }
 
-  convertAdvertisingData(data: ArrayBuffer): string {
+  batteryPorcentage_adv(data: ArrayBuffer): { batteryVoltage: number } {
+    const dataView = new DataView(data);
+
+    // Extract battery voltage values from positions 22 and 23
+    const batteryValue = dataView.getUint8(22) + dataView.getUint8(23) * 256;
+
+    // Convert millivolts to volts
+    const batteryVoltage = batteryValue / 1000;
+
+    return { batteryVoltage };
+  } 
+
+  convertAdvertisingDataHex(data: ArrayBuffer): string {
+    const dataView = new DataView(data);
+
+    // Convert to Uint8Array and map each byte to a two-digit hexadecimal representation
+    const hexArray = Array.from(new Uint8Array(dataView.buffer))
+        .map(byte => byte.toString(16).padStart(2, '0'));
+
+    // Join the hexadecimal values with spaces
+    const hexString = hexArray.join(' ');
+
+    // Store the result in device_advertising (optional)
+    let hex = hexString;
+
+    return hex;
+}
+
+
+  convertAdvertisingData(data: ArrayBuffer){
     const dataView = new DataView(data);
     this.device_advertising = Array.from(new Uint8Array(dataView.buffer)).toString();
+
+    this.device_advertising = this.device_advertising.join(' ');
     // this.parseAdvertisingData(this.device_advertising);
-    return Array.from(new Uint8Array(dataView.buffer)).toString();
+    return Array.from(new Uint8Array(dataView.buffer));
   }
+
+  // convertAdvertisingData(data: ArrayBuffer): string {
+  //   const dataView = new DataView(data);
+  //   this.device_advertising = Array.from(new Uint8Array(dataView.buffer)).toString();
+  //   // this.parseAdvertisingData(this.device_advertising);
+  //   return Array.from(new Uint8Array(dataView.buffer)).toString();
+  // }
   
   // parseAdvertisingData(dataString: string): number[] {
   //   const dataNumbers = dataString.split(',').map(Number);
