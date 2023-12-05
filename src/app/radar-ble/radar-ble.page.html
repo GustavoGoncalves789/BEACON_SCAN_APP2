@@ -37,29 +37,28 @@
   <h2>Função activateBluetooth</h2>
   <div *ngFor="let device of devices"> <!--*ngFor="let device of devices"-->
     <h3>{{ device.name || 'UnamedDevice' }}</h3>
-     <p>{{ device.id }}</p>
-     <p>RSSI (DEVICE.ID): {{ device.rssi }}</p>
+    <p>{{ device.id }}</p>
+    <p>RSSI (DEVICE.ID): {{ device.rssi }}</p>
      <!-- <p>Values[22]: {{ device.values22 }}</p>
      <p>Values[23]: {{ device.values23 }}</p> -->
-     <p>batteryPercentage(values[22] + values[23]): {{ device.batteryPercentage }}</p>
-     <p>X_Axis: {{ device.x_axis }}</p>
-     <p>Y_Axis: {{ device.y_axis }}</p>
-     <p>Z_Axis: {{ device.z_axis }}</p>
-     <!-- <p>MacAddress(BLE): {{ device.MacAddress }}</p> -->
-      <!-- <p>comma_count: {{ device.comma_count }}</p>  -->
-    <!-- <ion-button (click)="readBatteryLevel(device.id)">readBatteryLevel</ion-button>
-    <ion-button (click)="startAccelerometerNotifications(device.id)">readAccelerometerData</ion-button>
-    <ion-button (click)="connectDeviceBle(device.id)">Connect</ion-button> -->
-    
-    <!-- <p>DECIMAL: {{ device.advertisingDataDecimal }}</p>
-    <p>HEX: {{ device.advertasingDataHex }}</p><br><br>
-    <p>{{ device.deviceId }}</p>
-    <p>{{ device.deviceName }}</p>
-    <p>{{ device.deviceGapFlags }}</p> -->
-    <!-- <p>{{ device.advertisingDataParsed }}</p> -->
-    <!-- <p>{{ device.advertisingDataParsed }}</p> -->
-    
+    <p>batteryPercentage: {{ device.batteryPercentage }}</p>
+    <p>X_Axis: {{ device.x_axis | number:'1.2-2' }}</p>
+    <p>Y_Axis: {{ device.y_axis | number:'1.2-2' }}</p>
+    <p>Z_Axis: {{ device.z_axis | number:'1.2-2' }}</p>
+     
   </div>
+
+  <!-- debug area -->
+  <!-- <p>devices_filter: {{ devices_filter.length }}</p>
+  <p *ngFor="let device of devices_filter">devices_filter: {{ device || device.id }}</p>
+  <ion-list>
+    <ion-item *ngFor="let log of logFilter">
+      <ion-label>LogFilter: {{ log }}</ion-label>
+    </ion-item>
+  </ion-list>
+
+  <p *ngFor="let log of logFilter">foundItem: {{ foundItem }}</p> -->
+
 
   <!-- <div>
     DEVICE ADVERTASING:
@@ -73,7 +72,7 @@
       <ion-input #itemValor id="itemValor" label=" MAC " maxlength="17" placeholder="0A.0B.2C.0D.0E.8F" ></ion-input>
       <ion-button (click)="addDevice()" size="large" color="tertiary"  >Selecionar Device</ion-button>
       
-      <ion-button (click)="mac_validate(itemValor.value)" size="large" color="tertiary"  >+</ion-button>
+      <ion-button (click)="mac_validate(itemValor)" size="large" color="tertiary"  >+</ion-button>
       
     </ion-item>
   </ng-template>

@@ -15,6 +15,7 @@ import { Gyroscope, GyroscopeOrientation, GyroscopeOptions } from '@ionic-native
 
 
 
+
 @Component({
   selector: 'app-radar-ble',
   templateUrl: './radar-ble.page.html',
@@ -174,21 +175,10 @@ export class RadarBlePage {
             text: 'Adicionar',
             handler: (selectedDevice:any) => {
               if (selectedDevice) {
-                // Verifique se o dispositivo já não está na lista de filtros
-                const existsInFilter = this.devices_filter.some(device => device.id === selectedDevice.id);
+                
+                this.devices_filter.push(selectedDevice.id)
   
-                if (!existsInFilter) {
-                  // Adicione o dispositivo selecionado à lista de filtros
-                  this.devices_filter.push(selectedDevice);
-  
-                  // Encontre o índice do dispositivo na lista de IDs
-                  const index = this.devices.findIndex(device => device.id === selectedDevice.id);
-  
-                  // Se o dispositivo estiver na lista de IDs, remova-o pelo índice
-                  if (index !== -1) {
-                    this.devices.splice(index, 1);
-                  }
-                }
+              
               }
             },
           },
@@ -224,20 +214,16 @@ export class RadarBlePage {
 
     mac_validate(itemValor: any) {
       //deviceIds: string[] = this.devices.map(device => device.id);
-      
-      //const teste_array = [];
-      //teste_array.push({name: "ble", rssi: -51, id: '0A.00.27.00.00.08'})
+    
       const macAddressRegex =  /^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/;
-      //     /^([0-9A-Fa-f]{2}[:.]){5}([0-9A-Fa-f]{2})$/;
-      //filterCondition = (item: any) => item.category === 'Category A';
-      console.log(this.devices)
+
+     
+      // console.log(this.devices)
       if (macAddressRegex.test(itemValor) ) {
         console.log("Valid MAC address");
         const foundItem = this.devices.find(mac => mac.id === itemValor); //variavel que armazena o item achado
       
           if (foundItem) {
-            console.log("MAC é valido e existe no teste_array:", foundItem);
-            console.log(this.mylbl)
     
             // Adiciona a nova label ao container
               
@@ -247,11 +233,16 @@ export class RadarBlePage {
             this.newContainer.nativeElement.appendChild(newItem);
 
             
-            this.devices_filter.push(foundItem);
+            this.devices_filter.push(foundItem.id);
             console.log(this.devices_filter)
 
+            this.logFilter.push("Entrou no if (foundItem) mac_validate(itemValor: any) ");
+            this.logFilter.push(String(foundItem.id));
+            
+
+
           } else {
-            console.log("MAC não é valido e não existe no array");
+            this.logFilter.push(["MAC não é valido e não existe no array"]);
           }
         }
       }
@@ -269,6 +260,7 @@ export class RadarBlePage {
 
            this.devices_filter.push(device_filter);
             console.log(this.devices_filter)
+          
 
         } else {
           this.devices_filter = this.devices.slice(); // Se nenhum dispositivo for selecionado, copie todos os dispositivos para a lista filtrada.
@@ -293,16 +285,6 @@ export class RadarBlePage {
         const y = center + distance * Math.sin((angle * Math.PI) / 180);
         return `translate(${x}px, ${y}px)`;
       }
-      
-      
-      
-  // Função para calcular a posição de um dispositivo no círculo baseado no RSSI
-  //getDevicePosition(rssi: number, device_mac: any): string {
-  //  const angle = (rssi + 100) * 1.8; 
-  //  const x = 150 + 100 * Math.cos((angle * Math.PI) / 180);
-  //  const y = 150 + 100 * Math.sin((angle * Math.PI) / 180);
-  //  return `translate(${x}px, ${y}px)`;
-  //}
 
   // Função para simular a detecção de dispositivos BLE próximos
   simulateScan() {
@@ -324,13 +306,6 @@ export class RadarBlePage {
         this.isEnabled('IsOff');
       })
     }
-  //activateBluetooth() {
-  //  this.bluetoothSerial.isEnabled().then(response => {
-  //    this.isEnabled('IsOn');
-  //  }, error => {
-  //    this.isEnabled('IsOff');
-  //  })
-  //}
 
   connect(address:any){
     this.bluetoothSerial.connect(address).subscribe(successs => {
@@ -353,14 +328,45 @@ export class RadarBlePage {
     console.log('Dispositivo desconectado')
   }
 
+  logFilter: any[] = [];
+
   scanForDevices() {
     this.devices = []; // Limpa a lista de dispositivos antes de escanear novamente
     if (this.devices_filter.length >= 1){
-      this.ble.scan(this.devices_filter, 5).subscribe(device => {
-        // console.log(device);
-        this.devices.push(this.devices_filter);
-        console.log("if (this.devices_filter.length >= 1)")
-        //this.updateDeviceIds(); // Atualiza a lista de IDs após adicionar um dispositivo
+      this.ble.scan([], 5).subscribe(device => {
+        this.logFilter.push("Antes do If ");
+        if (this.devices_filter.includes(device.id))
+        {
+          this.logFilter.push("Depois do If (if (this.devices_filter.includes(device.id))) ");
+
+          // Filter the devices based on the IDs in the deviceIds array
+          let batteryPorcentage = this.batteryPorcentage_adv(device.advertising);
+          let x_axis = this.getAdvertasing_X_axis(device.advertising);
+          let y_axis = this.getAdvertasing_Y_axis(device.advertising);
+          let z_axis = this.getAdvertasing_Z_axis(device.advertising);
+          let MacAddress = this.getAdvertisingMacAddress(device.advertising);
+          const convertedDevice = {
+            name: device.name,
+            id: device.id,
+            rssi: device.rssi,
+  
+            // advertisingData: convertedData,
+            // advertisingDataDecimal: convertedData , //JSON.stringify(convertedData, null, 2)
+            // advertasingDataHex: arrayToHex,
+            batteryPercentage: batteryPorcentage.batteryVoltage + "mV",
+            x_axis: x_axis.X_Axis,
+            y_axis: y_axis.Y_Axis,
+            z_axis: z_axis.Z_Axis,
+            MacAddress : MacAddress.MacAddress,
+            // comma_count: comma_count,
+            // advertisingDataParsed: dataNumbersParse,
+  
+          };
+          this.devices.push(convertedDevice);
+        }
+        else {
+          this.logFilter.push("Filter not found")
+        }
       });
     } else {
       this.ble.scan([], 5).subscribe(device => {
@@ -385,7 +391,7 @@ export class RadarBlePage {
           // advertisingData: convertedData,
           // advertisingDataDecimal: convertedData , //JSON.stringify(convertedData, null, 2)
           // advertasingDataHex: arrayToHex,
-          batteryPercentage: batteryPorcentage.batteryVoltage,
+          batteryPercentage: batteryPorcentage.batteryVoltage + "mV",
           x_axis: x_axis.X_Axis,
           y_axis: y_axis.Y_Axis,
           z_axis: z_axis.Z_Axis,
@@ -414,6 +420,9 @@ export class RadarBlePage {
       X_Axis = X_Axis - 65536;
     }
 
+    // scale the data down to m/s2
+	  X_Axis = X_Axis / 100;
+
     return { X_Axis: X_Axis };
 
   }
@@ -429,6 +438,9 @@ export class RadarBlePage {
       Y_Axis = Y_Axis - 65536;
     }
 
+    // scale the data down to m/s2
+	  Y_Axis = Y_Axis / 100;
+
     return { Y_Axis: Y_Axis };
 
   }
@@ -443,6 +455,9 @@ export class RadarBlePage {
     {
       Z_Axis = Z_Axis - 65536;
     }
+
+    // scale the data down to m/s2
+	  Z_Axis = Z_Axis / 100;
 
     return { Z_Axis: Z_Axis };
 
