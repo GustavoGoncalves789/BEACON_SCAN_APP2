@@ -366,12 +366,16 @@ export class RadarBlePage {
       this.ble.scan([], 5).subscribe(device => {
         // console.log(device);
 
-        const convertedData = this.convertAdvertisingData(device.advertising);
-        const arrayToHex = this.convertAdvertisingDataHex(device.advertising);
+        // const convertedData = this.convertAdvertisingData(device.advertising);
+        // const arrayToHex = this.convertAdvertisingDataHex(device.advertising);
         
         let batteryPorcentage = this.batteryPorcentage_adv(device.advertising);
+        let x_axis = this.getAdvertasing_X_axis(device.advertising);
+        let y_axis = this.getAdvertasing_Y_axis(device.advertising);
+        let z_axis = this.getAdvertasing_Z_axis(device.advertising);
+        let MacAddress = this.getAdvertisingMacAddress(device.advertising);
 
-        let comma_count = (String(convertedData).match(/ /g) || []).length;
+        // let comma_count = (String(convertedData).match(/ /g) || []).length;
         // const dataNumbersParse = this.advertisingDataParsed
         const convertedDevice = {
           name: device.name,
@@ -379,10 +383,14 @@ export class RadarBlePage {
           rssi: device.rssi,
 
           // advertisingData: convertedData,
-          advertisingDataDecimal: convertedData , //JSON.stringify(convertedData, null, 2)
-          advertasingDataHex: arrayToHex,
+          // advertisingDataDecimal: convertedData , //JSON.stringify(convertedData, null, 2)
+          // advertasingDataHex: arrayToHex,
           batteryPercentage: batteryPorcentage.batteryVoltage,
-          comma_count: comma_count,
+          x_axis: x_axis.X_Axis,
+          y_axis: y_axis.Y_Axis,
+          z_axis: z_axis.Z_Axis,
+          MacAddress : MacAddress.MacAddress,
+          // comma_count: comma_count,
           // advertisingDataParsed: dataNumbersParse,
 
         };
@@ -393,11 +401,63 @@ export class RadarBlePage {
     } 
   }
 
+  getAdvertasing_X_axis(data: ArrayBuffer): { X_Axis: number }{
+
+    const dataView = new DataView(data);
+
+    // Extract X axis values from positions 16 and 17
+    const X_Axis = (dataView.getUint8(16) * 256) + dataView.getUint8(17);
+
+
+    return { X_Axis: X_Axis };
+
+  }
+  getAdvertasing_Y_axis(data: ArrayBuffer): { Y_Axis: number }{
+
+    const dataView = new DataView(data);
+
+    // Extract X axis values from positions 18 and 19
+    const Y_Axis = (dataView.getUint8(18) * 256) + dataView.getUint8(19);
+
+    return { Y_Axis: Y_Axis };
+
+  }
+  getAdvertasing_Z_axis(data: ArrayBuffer): { Z_Axis: number }{
+
+    const dataView = new DataView(data);
+
+    // Extract Z axis values from positions 20 and 21
+    const Z_Axis = (dataView.getUint8(20) * 256) + dataView.getUint8(21);
+
+    return { Z_Axis: Z_Axis };
+
+  }
+
+  getAdvertisingMacAddress(data: ArrayBuffer): { MacAddress: string } {
+    const dataView = new DataView(data);
+
+    // Check if the advertising data has the necessary length
+    if (data.byteLength < 30) {
+        throw new Error('Invalid advertising data length');
+    }
+
+    // Extract the MAC address bytes from positions 25-30
+    const macAddressBytes = new Uint8Array(data.slice(25, 31));
+
+    // Convert the MAC address bytes to a hexadecimal string
+    const macAddressHex = Array.from(macAddressBytes)
+        .map(byte => byte.toString(16).padStart(2, '0'))
+        .join(':');
+
+    return { MacAddress: macAddressHex };
+}
+
+
   batteryPorcentage_adv(data: ArrayBuffer): { batteryVoltage: number } {
     const dataView = new DataView(data);
 
     // Extract battery voltage values from positions 22 and 23
-    const batteryValue = dataView.getUint8(22) + dataView.getUint8(23) * 256;
+    const batteryValue = (dataView.getUint8(22) * 256) + dataView.getUint8(23);
 
     // Convert millivolts to volts
     const batteryVoltage = batteryValue / 1000;
