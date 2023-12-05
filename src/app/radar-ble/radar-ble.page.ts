@@ -364,6 +364,7 @@ export class RadarBlePage {
       });
     } else {
       this.ble.scan([], 5).subscribe(device => {
+<<<<<<< HEAD
         // console.log(device);
 
         // const convertedData = this.convertAdvertisingData(device.advertising);
@@ -376,12 +377,18 @@ export class RadarBlePage {
         let MacAddress = this.getAdvertisingMacAddress(device.advertising);
 
         // let comma_count = (String(convertedData).match(/ /g) || []).length;
+=======
+        console.log(device);
+        const convertedData = this.convertAdvertisingData(device.advertising);
+        let batteryVoltage = this.batteryPorcentage_adv(device.advertising);
+>>>>>>> 26e18009aa8761cfffa1a2ed8341f4572d08d25e
         // const dataNumbersParse = this.advertisingDataParsed
         const convertedDevice = {
           name: device.name,
           id: device.id,
           rssi: device.rssi,
 
+<<<<<<< HEAD
           // advertisingData: convertedData,
           // advertisingDataDecimal: convertedData , //JSON.stringify(convertedData, null, 2)
           // advertasingDataHex: arrayToHex,
@@ -391,6 +398,10 @@ export class RadarBlePage {
           z_axis: z_axis.Z_Axis,
           MacAddress : MacAddress.MacAddress,
           // comma_count: comma_count,
+=======
+          advertisingData: convertedData,
+          battery: batteryVoltage.batteryVoltage,
+>>>>>>> 26e18009aa8761cfffa1a2ed8341f4572d08d25e
           // advertisingDataParsed: dataNumbersParse,
 
         };
@@ -463,40 +474,14 @@ export class RadarBlePage {
     const batteryVoltage = batteryValue / 1000;
 
     return { batteryVoltage };
-  } 
-
-  convertAdvertisingDataHex(data: ArrayBuffer): string {
-    const dataView = new DataView(data);
-
-    // Convert to Uint8Array and map each byte to a two-digit hexadecimal representation
-    const hexArray = Array.from(new Uint8Array(dataView.buffer))
-        .map(byte => byte.toString(16).padStart(2, '0'));
-
-    // Join the hexadecimal values with spaces
-    const hexString = hexArray.join(' ');
-
-    // Store the result in device_advertising (optional)
-    let hex = hexString;
-
-    return hex;
 }
 
-
-  convertAdvertisingData(data: ArrayBuffer){
+  convertAdvertisingData(data: ArrayBuffer): string {
     const dataView = new DataView(data);
     this.device_advertising = Array.from(new Uint8Array(dataView.buffer)).toString();
-
-    this.device_advertising = this.device_advertising.join(' ');
     // this.parseAdvertisingData(this.device_advertising);
-    return Array.from(new Uint8Array(dataView.buffer));
+    return Array.from(new Uint8Array(dataView.buffer)).toString();
   }
-
-  // convertAdvertisingData(data: ArrayBuffer): string {
-  //   const dataView = new DataView(data);
-  //   this.device_advertising = Array.from(new Uint8Array(dataView.buffer)).toString();
-  //   // this.parseAdvertisingData(this.device_advertising);
-  //   return Array.from(new Uint8Array(dataView.buffer)).toString();
-  // }
   
   // parseAdvertisingData(dataString: string): number[] {
   //   const dataNumbers = dataString.split(',').map(Number);
