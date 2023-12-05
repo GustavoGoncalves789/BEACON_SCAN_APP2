@@ -406,8 +406,13 @@ export class RadarBlePage {
     const dataView = new DataView(data);
 
     // Extract X axis values from positions 16 and 17
-    const X_Axis = (dataView.getUint8(16) * 256) + dataView.getUint8(17);
+    let X_Axis = (dataView.getUint8(16) * 256) + dataView.getUint8(17);
 
+
+    if (X_Axis > 32767) // X axis not coming negative number (max-number is 65536)
+    {
+      X_Axis = X_Axis - 65536;
+    }
 
     return { X_Axis: X_Axis };
 
@@ -417,7 +422,12 @@ export class RadarBlePage {
     const dataView = new DataView(data);
 
     // Extract X axis values from positions 18 and 19
-    const Y_Axis = (dataView.getUint8(18) * 256) + dataView.getUint8(19);
+    let Y_Axis = (dataView.getUint8(18) * 256) + dataView.getUint8(19);
+
+    if (Y_Axis > 32767) // Y axis not coming negative number (max-number is 65536)
+    {
+      Y_Axis = Y_Axis - 65536;
+    }
 
     return { Y_Axis: Y_Axis };
 
@@ -427,7 +437,12 @@ export class RadarBlePage {
     const dataView = new DataView(data);
 
     // Extract Z axis values from positions 20 and 21
-    const Z_Axis = (dataView.getUint8(20) * 256) + dataView.getUint8(21);
+    let Z_Axis = (dataView.getUint8(20) * 256) + dataView.getUint8(21);
+
+    if (Z_Axis > 32767) // Z axis not coming negative number (max-number is 65536)
+    {
+      Z_Axis = Z_Axis - 65536;
+    }
 
     return { Z_Axis: Z_Axis };
 
