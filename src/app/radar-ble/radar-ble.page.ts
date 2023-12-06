@@ -1,5 +1,5 @@
 import { Component, NgZone, OnInit, ViewChild, ElementRef, AfterViewInit, ViewChildren, TemplateRef, numberAttribute } from '@angular/core';
-import { NavController } from '@ionic/angular';
+import { IonInput, NavController } from '@ionic/angular';
 
 import { BluetoothSerial } from '@awesome-cordova-plugins/bluetooth-serial/ngx';
 import { AlertController } from '@ionic/angular';
@@ -198,6 +198,9 @@ export class RadarBlePage {
 
     @ViewChild('itemValor', { read: ElementRef }) itemValor!: TemplateRef<any>;
 
+    // @ViewChild('itemValor') itemValor!: IonInput;
+
+
     crate_mac_input() {
       
       const newItem = this.newItem.createEmbeddedView(null).rootNodes[0];
@@ -212,17 +215,21 @@ export class RadarBlePage {
       console.log(this.devices)
     }
 
+    logMacValidate: any[] = [];
+
     mac_validate(itemValor: any) {
-      //deviceIds: string[] = this.devices.map(device => device.id);
+      // ItemValor is coming True (tested)
     
       const macAddressRegex =  /^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/;
 
-     
+      console.log("antes do if")
+
       // console.log(this.devices)
       if (macAddressRegex.test(itemValor) ) {
         console.log("Valid MAC address");
         const foundItem = this.devices.find(mac => mac.id === itemValor); //variavel que armazena o item achado
-      
+        console.log(foundItem)
+
           if (foundItem) {
     
             // Adiciona a nova label ao container
@@ -233,17 +240,17 @@ export class RadarBlePage {
             this.newContainer.nativeElement.appendChild(newItem);
 
             
-            this.devices_filter.push(foundItem.id);
-            console.log(this.devices_filter)
-
-            this.logFilter.push("Entrou no if (foundItem) mac_validate(itemValor: any) ");
-            this.logFilter.push(String(foundItem.id));
-            
+            this.devices_filter.push(itemValor);
+            // console.log(this.devices_filter)
 
 
           } else {
-            this.logFilter.push(["MAC não é valido e não existe no array"]);
+            console.log("MAC não é valido e não existe no array");
+            this.logMacValidate.push("MAC não é valido e não existe no array");
+            this.logMacValidate.push(foundItem);
           }
+        } else {
+          console.log("MAC não é valido");
         }
       }
 
@@ -421,7 +428,7 @@ export class RadarBlePage {
     }
 
     // scale the data down to m/s2
-	  X_Axis = X_Axis / 100;
+	  X_Axis = parseFloat((X_Axis / 100).toFixed(2));
 
     return { X_Axis: X_Axis };
 
@@ -439,7 +446,7 @@ export class RadarBlePage {
     }
 
     // scale the data down to m/s2
-	  Y_Axis = Y_Axis / 100;
+	  Y_Axis = parseFloat((Y_Axis / 100).toFixed(2));
 
     return { Y_Axis: Y_Axis };
 
@@ -457,7 +464,7 @@ export class RadarBlePage {
     }
 
     // scale the data down to m/s2
-	  Z_Axis = Z_Axis / 100;
+	  Z_Axis = parseFloat((Z_Axis / 100).toFixed(2));
 
     return { Z_Axis: Z_Axis };
 

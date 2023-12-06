@@ -42,9 +42,9 @@
      <!-- <p>Values[22]: {{ device.values22 }}</p>
      <p>Values[23]: {{ device.values23 }}</p> -->
     <p>batteryPercentage: {{ device.batteryPercentage }}</p>
-    <p>X_Axis: {{ device.x_axis | number:'1.2-2' }}</p>
-    <p>Y_Axis: {{ device.y_axis | number:'1.2-2' }}</p>
-    <p>Z_Axis: {{ device.z_axis | number:'1.2-2' }}</p>
+    <p>X_Axis: {{ device.x_axis }}</p>
+    <p>Y_Axis: {{ device.y_axis }}</p>
+    <p>Z_Axis: {{ device.z_axis }}</p>
      
   </div>
 
@@ -70,12 +70,18 @@
   <ng-template #newItem>
     <ion-item #mylbl color="secondary" class="input-custom" >
       <ion-input #itemValor id="itemValor" label=" MAC " maxlength="17" placeholder="0A.0B.2C.0D.0E.8F" ></ion-input>
-      <ion-button (click)="addDevice()" size="large" color="tertiary"  >Selecionar Device</ion-button>
+      <ion-button (click)="addDevice()" size="medium" color="tertiary"  >Selecionar Device</ion-button>
       
-      <ion-button (click)="mac_validate(itemValor)" size="large" color="tertiary"  >+</ion-button>
+      <ion-button (click)="mac_validate(itemValor.value)" size="medium" color="tertiary"  >+</ion-button>
       
     </ion-item>
   </ng-template>
+
+  <ion-list>
+    <ion-item *ngFor="let log of logMacValidate">
+      <ion-label>logMacValidate: {{ log || log.value }}</ion-label>
+    </ion-item>
+  </ion-list>
   
   <div class="round_map">
     <div class="circle">
