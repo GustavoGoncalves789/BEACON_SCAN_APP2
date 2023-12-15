@@ -57,28 +57,27 @@ export class RadarBlePage {
     private sensorService: SensorService,
     private deviceMotion: DeviceMotion,
     private gyroscope: Gyroscope
-    ) { //this.startGyroscope();
-      //this.sensorService.startGyroscope((orientation: any) => {
-        // Atualize a rotação da seta com base na orientação do giroscópio
-      //  this.arrowRotation = `${orientation.z}deg`;
-      //});
+    ) { 
 
-      
-
-      this.deviceMotion.getCurrentAcceleration().then(
-        (acceleration: DeviceMotionAccelerationData) => {
-          console.log('Acceleration X: ' + acceleration.x);
-          console.log('Acceleration Y: ' + acceleration.y);
-          console.log('Acceleration Z: ' + acceleration.z);
-        },
-        (error) => {
-          console.log('Erro ao obter dados de aceleração: ' + error);
-        });
-
-        
+      this.selectedDiv = 'NerBy';
+      this.buttonsBottom = 'Peripheral';  
     }
 
+    selectedDiv: string = '';
+    buttonsBottom: string = '';  
 
+    selectDiv(divName: string) {
+      this.selectedDiv = divName;
+      console.log(this.selectedDiv)
+    }
+
+    selectButtons(buttonName: string) {
+      this.buttonsBottom = buttonName;
+      console.log(this.buttonsBottom)
+      if (this.buttonsBottom == 'Scanner') {
+        this.navCtrl.navigateForward('tabs')
+      }
+    }
     
     startGyroscope() {
       const options: GyroscopeOptions = {

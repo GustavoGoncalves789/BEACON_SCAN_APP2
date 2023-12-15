@@ -45,6 +45,9 @@ export class TabsPage {
     selectButtons(buttonName: string) {
       this.buttonsBottom = buttonName;
       console.log(this.buttonsBottom)
+      if (this.buttonsBottom == 'Peripheral') {
+        this.navCtrl.navigateForward('radar-ble')
+      }
     }
   
     activateBluetooth() {

@@ -1,157 +1,169 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>radar_ble</ion-title>
+    <div class="center-top-toolbar">
+      <ion-buttons style="margin-left:1rem;margin-right: 1rem;" slot="start">
+        <ion-icon name="menu" size="large"></ion-icon>
+      </ion-buttons>
+      <ion-buttons >
+        <ion-title>BLE RADAR</ion-title>
+      </ion-buttons>
+      <ion-buttons slot="end">
+        <ion-icon name="wifi" size="large"></ion-icon>
+      </ion-buttons>
+      <ion-buttons style="margin-left:1rem;margin-right: 1rem;" slot="end">
+        <ion-icon name="search" size="large"></ion-icon>
+      </ion-buttons>
+    </div>
+    <div class="buttons">
+      <div #NerBy class="background_nearby" [class.NerBy]="selectedDiv === 'NerBy'" (click)="selectDiv('NerBy')" > 
+        <ion-label>Near By</ion-label>
+      </div>
+      <div #History class="background_history" [class.History]="selectedDiv === 'History'" (click)="selectDiv('History')"> 
+        <ion-label>History</ion-label>
+      </div>
+      <div #Favorites class="background_favorites" [class.Favorites]="selectedDiv === 'Favorites'" (click)="selectDiv('Favorites')"> 
+        <ion-label>Favorites</ion-label>
+      </div>
+    </div>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">radar_ble</ion-title>
-    </ion-toolbar>
-  </ion-header>
 
-  <!--
+  <div class="center-content">
+    <ion-button (click)="activateBluetooth()">Ativar Bluetooth</ion-button>
+    <ion-button (click)="scanForDevices()">Scan for Devices</ion-button>
 
-    
-  -->
+    <br><br>
 
-  <ion-button (click)="activateBluetooth()">Ativar Bluetooth</ion-button>
-  <ion-button (click)="scanForDevices()">Scan for Devices</ion-button>
-
-  <br><br>
-
-  <div id="divExterna" class="painel-orc">
-    <ion-button (click)="crate_mac_input()" >Filtro por MAC</ion-button>
-    <ion-button (click)="iniciarMonitoramento()">Iniciar Monitoramento</ion-button>
-    <ion-button (click)="startGyroscope()">printCurrentPosition</ion-button>
-    
-    
-    <ion-list scrollY="true" #newContainer >
+    <div id="divExterna" class="painel-orc">
+      <ion-button (click)="crate_mac_input()" >Filtro por MAC</ion-button>
+      <ion-button (click)="iniciarMonitoramento()">Iniciar Monitoramento</ion-button>
+      <ion-button (click)="startGyroscope()">printCurrentPosition</ion-button>
       
-
       
-    </ion-list>
-  </div>
-
-  <h2>Função activateBluetooth</h2>
-  <div *ngFor="let device of devices"> <!--*ngFor="let device of devices"-->
-    <h3>{{ device.name || 'UnamedDevice' }}</h3>
-    <p>{{ device.id }}</p>
-    <p>RSSI (DEVICE.ID): {{ device.rssi }}</p>
-     <!-- <p>Values[22]: {{ device.values22 }}</p>
-     <p>Values[23]: {{ device.values23 }}</p> -->
-    <p>batteryPercentage: {{ device.batteryPercentage }}</p>
-    <p>X_Axis: {{ device.x_axis }}</p>
-    <!-- <p>X_Axis: {{ device.X_calculate }}</p> -->
-    <p>Y_Axis: {{ device.y_axis | number:'1.2-2' }}</p>
-    <p>Z_Axis: {{ device.z_axis | number:'1.2-2' }}</p>
-     
-  </div>
-
-  <!-- debug area -->
-  <!-- <p>devices_filter: {{ devices_filter.length }}</p>
-  <p *ngFor="let device of devices_filter">devices_filter: {{ device || device.id }}</p>
-  <ion-list>
-    <ion-item *ngFor="let log of logFilter">
-      <ion-label>LogFilter: {{ log }}</ion-label>
-    </ion-item>
-  </ion-list>
-
-  <p *ngFor="let log of logFilter">foundItem: {{ foundItem }}</p> -->
-
-
-  <!-- <div>
-    DEVICE ADVERTASING:
-
-    {{ device_advertising }}
-
-  </div> -->
-
-  <ng-template #newItem>
-    <ion-item #mylbl color="secondary" class="input-custom" >
-      <ion-input #itemValor id="itemValor" label=" MAC " maxlength="17" placeholder="0A.0B.2C.0D.0E.8F" ></ion-input>
-      <ion-button (click)="addDevice()" size="medium" color="tertiary"  >Selecionar Device</ion-button>
-      
-      <ion-button (click)="mac_validate(itemValor.value)" size="medium" color="tertiary"  >+</ion-button>
-      
-    </ion-item>
-  </ng-template>
-
-
-  <p>LogX: {{ logX }}</p>
-  <p>LogX2: {{ logX2 }}</p>
-  <p>LogX3: {{ logX3 }}</p>
-  <p>LogXIF: {{ logXIF }}</p>
-  <p>getUint8(16): {{ getUint16_value16 }}</p>
-  <p>getUint8(17): {{ getUint8_value17 }}</p>
-  <p>calc: {{ calc }}</p>
-
-  <!-- <ion-list>
-    <ion-item *ngFor="let log of logX_Y_X">
-      logX_Y_X: {{ log | number:'1.2-2' }}
-    </ion-item>
-  </ion-list>  -->
-  
-  <div class="round_map">
-    <div class="circle">
-      <ng-container *ngIf="devices_filter.length > 0">
+      <ion-list scrollY="true" #newContainer >
         
-        <div class="device" [style.transform]="getDevicePosition(device.rssi, device.id)" *ngFor="let device of devices_filter">
-          <!--<div class="arrow" #arrow [style.transform]="'rotate(' + this.arrowRotation + 'deg)'" *ngIf="device.name === 'myPos'"></div>-->
-          {{ device.name || 'UnamedDevice' }}
-        </div>
-      </ng-container>
-      <ng-container *ngIf="devices_filter.length === 0">
+
         
-        <div class="device" [style.transform]="getDevicePosition(device.rssi, device.id)" *ngFor="let device of devices">
-          <!--<div class="arrow" #arrow [style.transform]="'rotate(' + this.arrowRotation + 'deg)'" *ngIf="device.name === 'myPos'"></div>-->
-          {{ device.name || 'UnamedDevice' }}
-        </div>
-      </ng-container>
+      </ion-list>
     </div>
-  </div>
-  
 
-  <!--
-0A.00.27.00.00.08
-  -->
+    <h2>Função activateBluetooth</h2>
+    <div *ngFor="let device of devices"> <!--*ngFor="let device of devices"-->
+      <h3>{{ device.name || 'UnamedDevice' }}</h3>
+      <p>{{ device.id }}</p>
+      <p>RSSI (DEVICE.ID): {{ device.rssi }}</p>
+      <!-- <p>Values[22]: {{ device.values22 }}</p>
+      <p>Values[23]: {{ device.values23 }}</p> -->
+      <p>batteryPercentage: {{ device.batteryPercentage }}</p>
+      <p>X_Axis: {{ device.x_axis }}</p>
+      <!-- <p>X_Axis: {{ device.X_calculate }}</p> -->
+      <p>Y_Axis: {{ device.y_axis | number:'1.2-2' }}</p>
+      <p>Z_Axis: {{ device.z_axis | number:'1.2-2' }}</p>
+      
+    </div>
 
-  <div *ngIf="accelerationX !== undefined">
-    <p>Aceleração X: {{ accelerationX }}</p>
-    <p>Aceleração Y: {{ accelerationY }}</p>
-    <p>Aceleração Z: {{ accelerationZ }}</p>
-  </div>
+    <!-- debug area -->
+    <!-- <p>devices_filter: {{ devices_filter.length }}</p>
+    <p *ngFor="let device of devices_filter">devices_filter: {{ device || device.id }}</p>
+    <ion-list>
+      <ion-item *ngFor="let log of logFilter">
+        <ion-label>LogFilter: {{ log }}</ion-label>
+      </ion-item>
+    </ion-list>
 
-  <div *ngIf="latitude_coords !== undefined">
-    <p>Longitude: {{ longitude_coords }}</p>
-    <p>Latitude: {{ latitude_coords }}</p>
-    <p>Gyroscopy : {{ cordinates_gyroscopy || 'undefined' }}</p>
+    <p *ngFor="let log of logFilter">foundItem: {{ foundItem }}</p> -->
+
+
+    <!-- <div>
+      DEVICE ADVERTASING:
+
+      {{ device_advertising }}
+
+    </div> -->
+
+    <ng-template #newItem>
+      <ion-item #mylbl color="secondary" class="input-custom" >
+        <ion-input #itemValor id="itemValor" label=" MAC " maxlength="17" placeholder="0A.0B.2C.0D.0E.8F" ></ion-input>
+        <ion-button (click)="addDevice()" size="medium" color="tertiary"  >Selecionar Device</ion-button>
+        
+        <ion-button (click)="mac_validate(itemValor.value)" size="medium" color="tertiary"  >+</ion-button>
+        
+      </ion-item>
+    </ng-template>
+
+
+    <p>LogX: {{ logX }}</p>
+    <p>LogX2: {{ logX2 }}</p>
+    <p>LogX3: {{ logX3 }}</p>
+    <p>LogXIF: {{ logXIF }}</p>
+    <p>getUint8(16): {{ getUint16_value16 }}</p>
+    <p>getUint8(17): {{ getUint8_value17 }}</p>
+    <p>calc: {{ calc }}</p>
+
+    <!-- <ion-list>
+      <ion-item *ngFor="let log of logX_Y_X">
+        logX_Y_X: {{ log | number:'1.2-2' }}
+      </ion-item>
+    </ion-list>  -->
     
-  </div>
-  <div *ngIf="latitude_coords !== undefined">
-    <p>Gyroscopy : {{ cordinates_gyroscopy || 'undefined' }}</p>
+    <div class="round_map">
+      <div class="circle">
+        <ng-container *ngIf="devices_filter.length > 0">
+          
+          <div class="device" [style.transform]="getDevicePosition(device.rssi, device.id)" *ngFor="let device of devices_filter">
+            <!--<div class="arrow" #arrow [style.transform]="'rotate(' + this.arrowRotation + 'deg)'" *ngIf="device.name === 'myPos'"></div>-->
+            {{ device.name || 'UnamedDevice' }}
+          </div>
+        </ng-container>
+        <ng-container *ngIf="devices_filter.length === 0">
+          
+          <div class="device" [style.transform]="getDevicePosition(device.rssi, device.id)" *ngFor="let device of devices">
+            <!--<div class="arrow" #arrow [style.transform]="'rotate(' + this.arrowRotation + 'deg)'" *ngIf="device.name === 'myPos'"></div>-->
+            {{ device.name || 'UnamedDevice' }}
+          </div>
+        </ng-container>
+      </div>
+    </div>
+    
 
-  </div>
-  
+    <!--
+  0A.00.27.00.00.08
+    -->
 
-  <p>{{ activateBluetoothError }}</p>
-  <p>{{ scanDevicesError }}</p>
+    <div *ngIf="accelerationX !== undefined">
+      <p>Aceleração X: {{ accelerationX }}</p>
+      <p>Aceleração Y: {{ accelerationY }}</p>
+      <p>Aceleração Z: {{ accelerationZ }}</p>
+    </div>
+
+    <div *ngIf="latitude_coords !== undefined">
+      <p>Longitude: {{ longitude_coords }}</p>
+      <p>Latitude: {{ latitude_coords }}</p>
+      <p>Gyroscopy : {{ cordinates_gyroscopy || 'undefined' }}</p>
+      
+    </div>
+    <div *ngIf="latitude_coords !== undefined">
+      <p>Gyroscopy : {{ cordinates_gyroscopy || 'undefined' }}</p>
+
+    </div>
+    
+
+    <p>{{ activateBluetoothError }}</p>
+    <p>{{ scanDevicesError }}</p>
+  </div>
 </ion-content>
 
 <div class="tabs">
-  <ion-tab-bar slot="bottom">
-    <ion-tab-button tab="back">
-      <ion-icon size="large" (click)="navBluetoothHome()" name="bluetooth-outline"></ion-icon>
-      <ion-label>_______</ion-label>
+  <ion-tab-bar class="buttons_bottom_Scanner" slot="bottom" [class.buttons_bottom_Scanner_Clicked]="buttonsBottom === 'Scanner'">
+    <ion-tab-button class="buttons_bottom_Scanner" [class.buttons_bottom_Scanner_Clicked]="buttonsBottom === 'Scanner'" (click)="selectButtons('Scanner')">
+      Scanner
     </ion-tab-button>
-    <ion-tab-button class="home-tab" tab="home">
-      <ion-icon size="large" name="home-outline"></ion-icon>
-      <ion-label>_______</ion-label>
-    </ion-tab-button>
-    <ion-tab-button (click)="navRadarBLE()" tab="orcamento">
-      <ion-icon color="primary" size="large" name="locate"></ion-icon>
-      <ion-label color="primary">_______</ion-label>
+  </ion-tab-bar>
+  <ion-tab-bar class="buttons_bottom_Peripheral" slot="bottom" [class.buttons_bottom_Peripheral_Clicked]="buttonsBottom === 'Peripheral'">
+    <ion-tab-button class="buttons_bottom_Peripheral" [class.buttons_bottom_Scanner_Clicked]="buttonsBottom === 'Peripheral'" (click)="selectButtons('Peripheral')">
+      Peripheral
     </ion-tab-button>
   </ion-tab-bar>
 </div>
