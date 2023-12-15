@@ -7,4 +7,155 @@
     top: 50%;
     transform: translateY(-50%);
   }
+
+  ion-toolbar {
+    height: 8rem;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-content: center;
+    justify-content: center;
+    align-items: center;
+    background: #4fb5e7;
+    --background: #4fb5e7;
+    // background-color: #4fb5e7;
+    // --webkit-background-color: #4fb5e7;
+  }
+
+  .center-top-toolbar {
+    height: 4rem;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-content: center;
+    justify-content: center;
+    align-items: center;
+    background: #4fb5e7;
+    --background: #4fb5e7;
+  }
+
+  .buttons {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-content: center;
+    justify-content: center;
+    align-items: center;
+    // padding: 1rem;
+  }
+
+  .buttons div {
+    justify-content: center;
+    margin: 0.5rem 0;
+    width: 6rem;
+    height: 3rem;
+    align-self: center;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-content: center;
+    align-items: center;
+    
+  }
+
+  // before click
+
+  .background_nearby {
+    background: #3e97c2;
+    border-radius: 10px 0 0 10px;
+  }
+
+  .background_history {
+    background: #3e97c2;
+    // border-radius: 10px 0 0 10px;
+  }
+
+  .background_favorites {
+    background: #3e97c2;
+    border-radius: 0 10px 10px 0;
+  }	
+
+  .buttons_bottom_Scanner {
+    background: #3e97c2;
+    color: white;
+    width: 50%;
+    font-size: 1rem;
+    // font-weight: bold;
+  }
+
+  .buttons_bottom_Peripheral {
+    background: #3e97c2;
+    color: white;
+    width: 50%;
+    font-size: 1rem;
+    // font-weight: bold;
+  }
+
+  // after click
+
+  .NerBy {
+    background: #3584a4;
+    border-radius: 10px 0 0 10px;
+  }	
+
+
+  .Favorites {
+    background: #3584a4;
+    border-radius: 0 10px 10px 0;
+  }
+
+  .History {
+    background: #3584a4;
+    // border-radius: 0 10px 10px 0;
+  }
+
+  .buttons_bottom_Scanner_Clicked {
+    background: #3584a4;
+    --background: #3584a4;
+    color: white;
+    font-size: 1rem;
+    font-weight: bold;
+  }
+
+  .buttons_bottom_Peripheral_Clicked {
+    background: #3584a4;
+    --background: #3584a4;;
+    color: white;
+    font-size: 1rem;
+    font-weight: bold;
+  }
+
+  // if selected
+  // border-radius: 10px 0 0 10px;
+  // background: #3583a6;
+
+  .selected {
+    background-color: #3584a4; /* Change to your preferred color */
+  }
+
+  .tabs {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-content: center;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+  }	  
+
+  ion-title {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: white;
+    text-align: center;
+  }
+
+  .center-content {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    align-content: stretch;
+    justify-content: flex-start;
+    align-items: stretch;
+  }
   

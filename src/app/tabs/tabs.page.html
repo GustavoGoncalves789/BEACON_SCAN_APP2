@@ -1,15 +1,43 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>tabs</ion-title>
+    <div class="center-top-toolbar">
+      <ion-buttons style="margin-left:1rem;margin-right: 1rem;" slot="start">
+        <ion-icon name="menu" size="large"></ion-icon>
+      </ion-buttons>
+      <ion-buttons >
+        <ion-title>BLE SCAN</ion-title>
+      </ion-buttons>
+      <ion-buttons slot="end">
+        <ion-icon name="wifi" size="large"></ion-icon>
+      </ion-buttons>
+      <ion-buttons style="margin-left:1rem;margin-right: 1rem;" slot="end">
+        <ion-icon name="search" size="large"></ion-icon>
+      </ion-buttons>
+    </div>
+    <div class="buttons">
+      <!-- <ion-button style="margin-left:1rem;margin-right: 1rem;" slot="start">
+        Near By
+      </ion-button>
+      <ion-button style="margin-left:1rem;margin-right: 1rem;" slot="end">
+        History
+      </ion-button>
+      <ion-button style="margin-left:1rem;margin-right: 1rem;" slot="end">
+        Favorites
+      </ion-button> -->
+      <div #NerBy class="background_nearby" [class.NerBy]="selectedDiv === 'NerBy'" (click)="selectDiv('NerBy')" > 
+        <ion-label>Near By</ion-label>
+      </div>
+      <div #History class="background_history" [class.History]="selectedDiv === 'History'" (click)="selectDiv('History')"> 
+        <ion-label>History</ion-label>
+      </div>
+      <div #Favorites class="background_favorites" [class.Favorites]="selectedDiv === 'Favorites'" (click)="selectDiv('Favorites')"> 
+        <ion-label>Favorites</ion-label>
+      </div>
+    </div>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Home</ion-title>
-    </ion-toolbar>
-  </ion-header>
 
   <!--
     name
@@ -28,60 +56,46 @@
 
   -->
   
-  <ion-button (click)="activateBluetooth()">Ativar Bluetooth</ion-button>
-  <ion-button (click)="scanForDevices()">Scan for Devices</ion-button>
-
-
-  <h2>Função activateBluetooth</h2>
-  <div *ngFor="let device of devices">
-    <h3>{{ device.name }}</h3>
-    <p>{{ device.id }}</p>
-    <p>RSSI: {{ device.rssi }}</p>
-    <ion-button (click)="connect(device.address)">Conectar</ion-button>
+  <div class="center-content">
+    <ion-button (click)="activateBluetooth()">Ativar Bluetooth</ion-button>
+    <ion-button (click)="scanForDevices()">Scan for Devices</ion-button>
+  
+  
+    <h2>Função activateBluetooth</h2>
+    <div *ngFor="let device of devices">
+      <h3>{{ device.name }}</h3>
+      <p>{{ device.id }}</p>
+      <p>RSSI: {{ device.rssi }}</p>
+      <ion-button (click)="connect(device.address)">Conectar</ion-button>
+    </div>
+  
+    <ion-list>
+      <ion-item *ngFor="let device of devices">
+        <ion-label>{{ device.name || 'Unnamed Device' }}</ion-label>
+        <ion-label>{{ device.rssi || 'RSSI fora de alcanse' }}</ion-label>
+      </ion-item>
+    </ion-list>
+    
+    <div *ngIf="devices.length === 0">
+      <p>Nenhum aparelho ao alcance...</p>
+    </div>
+    
+    <p>{{ activateBluetoothError }}</p>
+    <p>{{ scanDevicesError }}</p>
+    
   </div>
-
-  <ion-list>
-    <ion-item *ngFor="let device of devices">
-      <ion-label>{{ device.name || 'Unnamed Device' }}</ion-label>
-      <ion-label>{{ device.rssi || 'RSSI fora de alcanse' }}</ion-label>
-    </ion-item>
-  </ion-list>
-  
-  <div *ngIf="devices.length === 0">
-    <p>Nenhum aparelho ao alcance...</p>
-  </div>
-  
-  <p>{{ activateBluetoothError }}</p>
-  <p>{{ scanDevicesError }}</p>
-
-  
-
-
-  
 </ion-content>
 
 <div class="tabs">
-  <ion-tab-bar slot="bottom">
-    <ion-tab-button tab="back">
-      <ion-icon size="large" color="primary" name="bluetooth-outline"></ion-icon>
-      <ion-label color="primary">_______</ion-label>
+  <ion-tab-bar class="buttons_bottom_Scanner" slot="bottom" [class.buttons_bottom_Scanner_Clicked]="buttonsBottom === 'Scanner'">
+    <ion-tab-button class="buttons_bottom_Scanner" [class.buttons_bottom_Scanner_Clicked]="buttonsBottom === 'Scanner'" (click)="selectButtons('Scanner')">
+      Scanner
     </ion-tab-button>
-    <ion-tab-button class="home-tab" tab="home">
-      <ion-icon size="large" name="home-outline"></ion-icon>
-      <ion-label>_______</ion-label>
-    </ion-tab-button>
-    <ion-tab-button (click)="navRadarBLE()" tab="orcamento">
-      <ion-icon size="large" name="locate"></ion-icon>
-      <ion-label>_______</ion-label>
+  </ion-tab-bar>
+  <ion-tab-bar class="buttons_bottom_Peripheral" slot="bottom" [class.buttons_bottom_Peripheral_Clicked]="buttonsBottom === 'Peripheral'">
+    <ion-tab-button class="buttons_bottom_Peripheral" [class.buttons_bottom_Scanner_Clicked]="buttonsBottom === 'Peripheral'" (click)="selectButtons('Peripheral')">
+      Peripheral
     </ion-tab-button>
   </ion-tab-bar>
 </div>
 
-<!--
-<h2>Função scanDevices</h2>
-  <ion-list>
-    <ion-item *ngFor="let device of devices">
-      {{ device.name }} - RSSI: {{ device.rssi }}
-    </ion-item>
-  </ion-list>
--->

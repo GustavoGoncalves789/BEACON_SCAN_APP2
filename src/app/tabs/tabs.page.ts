@@ -1,4 +1,4 @@
-import { Component, NgZone, OnInit } from '@angular/core';
+import { Component, NgZone, OnInit, ViewChild,  ElementRef, AfterViewInit, Renderer2  } from '@angular/core';
 import { NavController } from '@ionic/angular';
 
 import { BluetoothSerial } from '@awesome-cordova-plugins/bluetooth-serial/ngx';
@@ -27,9 +27,24 @@ export class TabsPage {
     private alertContrl : AlertController,
     //private bluetoothLE : BluetoothLE,
     private ngZone : NgZone,
-    private ble: BLE
+    private ble: BLE,
+    private renderer: Renderer2
     ) {
+      this.selectedDiv = 'NerBy';
+      this.buttonsBottom = 'Scanner';
+    }
     
+    selectedDiv: string = '';
+    buttonsBottom: string = '';  
+
+    selectDiv(divName: string) {
+      this.selectedDiv = divName;
+      console.log(this.selectedDiv)
+    }
+
+    selectButtons(buttonName: string) {
+      this.buttonsBottom = buttonName;
+      console.log(this.buttonsBottom)
     }
   
     activateBluetooth() {

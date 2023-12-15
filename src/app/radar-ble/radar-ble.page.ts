@@ -12,6 +12,7 @@ import { SensorService } from '../sensor.service';
 import { DeviceMotion, DeviceMotionAccelerationData } from '@ionic-native/device-motion/ngx';
 //import { Gyroscope } from 'ionic-native';
 import { Gyroscope, GyroscopeOrientation, GyroscopeOptions } from '@ionic-native/gyroscope/ngx';
+// import { log } from 'console';
 
 
 
@@ -400,6 +401,7 @@ export class RadarBlePage {
           // advertasingDataHex: arrayToHex,
           batteryPercentage: batteryPorcentage.batteryVoltage + "mV",
           x_axis: x_axis.X_Axis,
+          // x_array32: x_axis.X_calculate,
           y_axis: y_axis.Y_Axis,
           z_axis: z_axis.Z_Axis,
           MacAddress : MacAddress.MacAddress,
@@ -414,21 +416,76 @@ export class RadarBlePage {
     } 
   }
 
-  getAdvertasing_X_axis(data: ArrayBuffer): { X_Axis: number }{
+  logX_Y_X: any[] = [];
+  logX: string = "";
+  logX2: string = "";
+  logX3: string = "";
+  logXIF: string = "";
+  getUint16_value16: string = "";
+  getUint8_value17: string = "";
+  calc: string = "";
+
+//   getAdvertasing_X_axis(data: ArrayBuffer): { X_Axis: number } {
+//     const dataView = new DataView(data);
+
+//     // Extract X axis values from positions 16 and 17
+//     const xRawValue = (dataView.getUint8(16) << 8) | dataView.getUint8(17);
+
+//     this.logX = xRawValue.toString();
+
+//     // Convert X_Axis to a float and scale it down
+//     let X_Axis = xRawValue / 100.0;
+    
+//     this.logX2 = X_Axis.toFixed(2);
+
+//     // Check if the value is negative (using a 16-bit signed integer)
+//     if (xRawValue > 32767) {
+//         X_Axis = X_Axis - 655.36; // Subtracting 655.36 for negative values
+//     }
+    
+//     this.logX3 = X_Axis.toString();
+
+//     return { X_Axis };
+// }
+
+  // getUint8AsDouble(data: ArrayBuffer, position: number): number {
+  //   const dataView = new DataView(data);
+  //   const uint8Value = dataView.getUint8(position);
+
+  //   // Scale the Uint8 value to the desired range for your application
+  //   const scaledValue = uint8Value / 100.0; // This assumes you want a range between 0 and 1
+
+  //   return scaledValue;
+  // }
+
+
+  getAdvertasing_X_axis(data: ArrayBuffer): { X_Axis: Number }{
 
     const dataView = new DataView(data);
 
-    // Extract X axis values from positions 16 and 17
-    let X_Axis = (dataView.getUint8(16) * 256) + dataView.getUint8(17);
+    this.getUint16_value16 = (dataView.getUint8(16)).toString();
+    this.getUint8_value17 = (dataView.getUint8(17)).toString();
+    this.calc = ((Number(this.getUint16_value16) * 256) + Number(this.getUint8_value17)).toString();
 
+    // Extract X axis value from positions 16 and 17
+    let X_Axis = (dataView.getUint8(16) * 256) + dataView.getUint8(17); // true for little-endian
+
+    this.logX = X_Axis.toString();
 
     if (X_Axis > 32767) // X axis not coming negative number (max-number is 65536)
     {
       X_Axis = X_Axis - 65536;
-    }
+      this.logXIF = "if (X_Axis > 32767)";
+    } else { this.logXIF = "else"; }
+
+    this.logX2 = X_Axis.toString();
 
     // scale the data down to m/s2
-	  X_Axis = parseFloat((X_Axis / 100).toFixed(2));
+	  X_Axis = X_Axis / 92.6;
+
+    X_Axis = parseFloat(X_Axis.toFixed(3));
+
+    this.logX3 = X_Axis.toString();
 
     return { X_Axis: X_Axis };
 
@@ -440,13 +497,22 @@ export class RadarBlePage {
     // Extract X axis values from positions 18 and 19
     let Y_Axis = (dataView.getUint8(18) * 256) + dataView.getUint8(19);
 
+    this.logX_Y_X.push("(dataView.getUint8(18) * 256) + dataView.getUint8(19)");
+    this.logX_Y_X.push(Y_Axis);
+
     if (Y_Axis > 32767) // Y axis not coming negative number (max-number is 65536)
     {
       Y_Axis = Y_Axis - 65536;
     }
 
+    this.logX_Y_X.push("if (Y_Axis > 32767)");
+    this.logX_Y_X.push(Y_Axis);
+
     // scale the data down to m/s2
-	  Y_Axis = parseFloat((Y_Axis / 100).toFixed(2));
+	  Y_Axis = Y_Axis / 92.6;
+
+    this.logX_Y_X.push("Y_Axis / 100.0");
+    this.logX_Y_X.push(Y_Axis);
 
     return { Y_Axis: Y_Axis };
 
@@ -458,13 +524,22 @@ export class RadarBlePage {
     // Extract Z axis values from positions 20 and 21
     let Z_Axis = (dataView.getUint8(20) * 256) + dataView.getUint8(21);
 
+    this.logX_Y_X.push("(dataView.getUint8(20) * 256) + dataView.getUint8(21)");
+    this.logX_Y_X.push(Z_Axis);
+
     if (Z_Axis > 32767) // Z axis not coming negative number (max-number is 65536)
     {
       Z_Axis = Z_Axis - 65536;
     }
 
+    this.logX_Y_X.push("if (Y_Axis > 32767)");
+    this.logX_Y_X.push(Z_Axis);
+
     // scale the data down to m/s2
-	  Z_Axis = parseFloat((Z_Axis / 100).toFixed(2));
+	  Z_Axis = Z_Axis / 92.6;//parseFloat((Z_Axis / 100).toFixed(2));
+
+    this.logX_Y_X.push("Z_Axis / 100.0");
+    this.logX_Y_X.push(Z_Axis);
 
     return { Z_Axis: Z_Axis };
 

@@ -43,8 +43,9 @@
      <p>Values[23]: {{ device.values23 }}</p> -->
     <p>batteryPercentage: {{ device.batteryPercentage }}</p>
     <p>X_Axis: {{ device.x_axis }}</p>
-    <p>Y_Axis: {{ device.y_axis }}</p>
-    <p>Z_Axis: {{ device.z_axis }}</p>
+    <!-- <p>X_Axis: {{ device.X_calculate }}</p> -->
+    <p>Y_Axis: {{ device.y_axis | number:'1.2-2' }}</p>
+    <p>Z_Axis: {{ device.z_axis | number:'1.2-2' }}</p>
      
   </div>
 
@@ -77,11 +78,20 @@
     </ion-item>
   </ng-template>
 
-  <ion-list>
-    <ion-item *ngFor="let log of logMacValidate">
-      <ion-label>logMacValidate: {{ log || log.value }}</ion-label>
+
+  <p>LogX: {{ logX }}</p>
+  <p>LogX2: {{ logX2 }}</p>
+  <p>LogX3: {{ logX3 }}</p>
+  <p>LogXIF: {{ logXIF }}</p>
+  <p>getUint8(16): {{ getUint16_value16 }}</p>
+  <p>getUint8(17): {{ getUint8_value17 }}</p>
+  <p>calc: {{ calc }}</p>
+
+  <!-- <ion-list>
+    <ion-item *ngFor="let log of logX_Y_X">
+      logX_Y_X: {{ log | number:'1.2-2' }}
     </ion-item>
-  </ion-list>
+  </ion-list>  -->
   
   <div class="round_map">
     <div class="circle">
