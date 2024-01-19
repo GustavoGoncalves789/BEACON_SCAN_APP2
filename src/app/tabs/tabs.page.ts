@@ -1,5 +1,5 @@
 import { Component, NgZone, OnInit, ViewChild,  ElementRef, AfterViewInit, Renderer2  } from '@angular/core';
-import { NavController } from '@ionic/angular';
+import { MenuController, NavController } from '@ionic/angular';
 
 import { BluetoothSerial } from '@awesome-cordova-plugins/bluetooth-serial/ngx';
 import { AlertController } from '@ionic/angular';
@@ -28,7 +28,8 @@ export class TabsPage {
     //private bluetoothLE : BluetoothLE,
     private ngZone : NgZone,
     private ble: BLE,
-    private renderer: Renderer2
+    private renderer: Renderer2,
+    private menu: MenuController
     ) {
       this.selectedDiv = 'NerBy';
       this.buttonsBottom = 'Scanner';
@@ -72,6 +73,11 @@ export class TabsPage {
     }, error => {
       console.log('error')
     })
+  }
+
+  openMenu() {
+    this.menu.toggle('first');
+    console.log('Menu aberto')
   }
 
   setData(){
@@ -138,6 +144,10 @@ export class TabsPage {
   navRadarBLE() {
     this.navCtrl.navigateForward('radar-ble')
     
+  }
+
+  navEPIPage() {
+    this.navCtrl.navigateForward('epi')
   }
 
   

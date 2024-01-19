@@ -23,6 +23,10 @@ const routes: Routes = [
     path: 'config',
     loadChildren: () => import('./config/config.module').then( m => m.ConfigPageModule)
   },
+  {
+    path: 'epi',
+    loadChildren: () => import('./epi/epi.module').then( m => m.EpiPageModule)
+  },
 
 ];
 

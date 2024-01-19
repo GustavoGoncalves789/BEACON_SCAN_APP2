@@ -2,7 +2,7 @@
   <ion-toolbar>
     <div class="center-top-toolbar">
       <ion-buttons style="margin-left:1rem;margin-right: 1rem;" slot="start">
-        <ion-icon name="menu" size="large"></ion-icon>
+        <ion-icon name="menu" (click)="openMenu()" size="large"></ion-icon>
       </ion-buttons>
       <ion-buttons >
         <ion-title>BLE RADAR</ion-title>
@@ -27,6 +27,22 @@
     </div>
   </ion-toolbar>
 </ion-header>
+
+<ion-menu side="start" menuId="first" contentId="main-content">
+  <ion-header>
+    <ion-toolbar color="primary">
+      <ion-title>Options</ion-title>
+    </ion-toolbar>
+  </ion-header>
+  <ion-content>
+    <ion-list>
+      <ion-item (click)="navEPIPage()">EPI Security</ion-item>
+      <ion-item>Radar Map</ion-item>
+      <ion-item>Comming Soon...</ion-item>
+    </ion-list>
+  </ion-content>
+</ion-menu>
+<ion-router-outlet id="main-content"></ion-router-outlet>
 
 <ion-content [fullscreen]="true">
 

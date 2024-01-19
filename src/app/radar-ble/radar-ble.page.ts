@@ -1,5 +1,5 @@
 import { Component, NgZone, OnInit, ViewChild, ElementRef, AfterViewInit, ViewChildren, TemplateRef, numberAttribute } from '@angular/core';
-import { IonInput, NavController } from '@ionic/angular';
+import { IonInput, MenuController, NavController } from '@ionic/angular';
 
 import { BluetoothSerial } from '@awesome-cordova-plugins/bluetooth-serial/ngx';
 import { AlertController } from '@ionic/angular';
@@ -53,9 +53,10 @@ export class RadarBlePage {
     private alertContrl : AlertController,
     //private bluetoothLE : BluetoothLE,
     private ble: BLE,
-    private geolocation: Geolocation,
-    private sensorService: SensorService,
+    // private geolocation: Geolocation,
+    // private sensorService: SensorService,
     private deviceMotion: DeviceMotion,
+    private menu: MenuController,
     private gyroscope: Gyroscope
     ) { 
 
@@ -69,6 +70,11 @@ export class RadarBlePage {
     selectDiv(divName: string) {
       this.selectedDiv = divName;
       console.log(this.selectedDiv)
+    }
+
+    openMenu() {
+      this.menu.toggle('first');
+      console.log('Menu aberto')
     }
 
     selectButtons(buttonName: string) {
@@ -654,9 +660,8 @@ export class RadarBlePage {
     this.navCtrl.navigateForward('tabs')
   }
 
-  navRadarBLE() {
-    this.navCtrl.navigateForward('radar-ble')
-    
+  navEPIPage() {
+    this.navCtrl.navigateForward('epi')
   }
 
   

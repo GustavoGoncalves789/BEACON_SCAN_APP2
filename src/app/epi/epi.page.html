@@ -5,7 +5,7 @@
         <ion-icon name="menu"  (click)="openMenu()" size="large"></ion-icon>
       </ion-buttons>
       <ion-buttons >
-        <ion-title>BLE SCAN</ion-title>
+        <ion-title>EPI Security</ion-title>
       </ion-buttons>
       <ion-buttons slot="end">
         <ion-icon name="wifi" size="large"></ion-icon>
@@ -78,7 +78,7 @@
     <ion-button (click)="scanForDevices()">Scan for Devices</ion-button>
   
   
-    <h2>Função activateBluetooth</h2>
+    <!-- <h2>Função activateBluetooth</h2> -->
     <div *ngFor="let device of devices">
       <h3>{{ device.name }}</h3>
       <p>{{ device.id }}</p>
