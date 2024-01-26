@@ -83,11 +83,17 @@
       <h3>{{ device.name }}</h3>
       <p>{{ device.id }}</p>
       <p>RSSI: {{ device.rssi }}</p>
-      <ion-button (click)="connect(device.address)">Conectar</ion-button>
+      <!-- <ion-button (click)="connect(device.address)">Conectar</ion-button> -->
+      <div class="buttons_devices">
+        <ion-button (click)="selectDevice(device)">Select</ion-button>
+        
+        <ion-icon *ngIf="isDeviceSelected(device.id)" style="color:#55ffba;" name="bluetooth" size="large"></ion-icon>
+      </div>
     </div>
   
+    <h2 *ngIf="devicesSelected.length > 0">Devices Selected</h2>
     <ion-list>
-      <ion-item *ngFor="let device of devices">
+      <ion-item *ngFor="let device of devicesSelected">
         <ion-label>{{ device.name || 'Unnamed Device' }}</ion-label>
         <ion-label>{{ device.rssi || 'RSSI fora de alcanse' }}</ion-label>
       </ion-item>

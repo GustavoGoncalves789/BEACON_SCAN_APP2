@@ -35,6 +35,7 @@
     "@ionic-native/geolocation": "^5.36.0",
     "@ionic-native/gyroscope": "^5.36.0",
     "@ionic-native/sensors": "^5.36.0",
+    "@ionic-native/speech-recognition": "^5.36.0",
     "@ionic/angular": "^7.0.0",
     "cordova-plugin-ble-central": "^1.7.0",
     "cordova-plugin-bluetooth-serial": "^0.4.7",

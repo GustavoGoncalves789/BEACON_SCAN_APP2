@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { BluetoothSerial } from '@awesome-cordova-plugins/bluetooth-serial/ngx';
 import { BLE } from '@ionic-native/ble/ngx';
 import { AlertController, MenuController, NavController } from '@ionic/angular';
+// import { SpeechRecognition } from '@ionic-native/speech-recognition/ngx';
+
 
 @Component({
   selector: 'app-epi',
@@ -10,6 +12,7 @@ import { AlertController, MenuController, NavController } from '@ionic/angular';
 })
 export class EpiPage implements OnInit {
 
+  devicesSelected: any[] = [];
 
   constructor(
     private menu : MenuController,
@@ -17,10 +20,64 @@ export class EpiPage implements OnInit {
     private bluetoothSerial: BluetoothSerial,
     private ble: BLE,
     private alertContrl : AlertController,
+    // private speechRecognition: SpeechRecognition,
     ) 
     {
       this.selectedDiv = 'NerBy';
       this.buttonsBottom = 'Scanner';
+
+
+      // setInterval(() => {
+      //   this.devicesSelected.forEach(device => {
+      //     this.ble.readRSSI(device.id).then(rssi => {
+      //       if (rssi > -70 || rssi > -60) { // Replace SOME_VALUE with the RSSI threshold
+      //         console.log("Alert");
+      //         alert('Alerta de proximidade com o dispositivo ' + device.name)
+      //       }
+      //     }).catch(err => {
+      //       console.log("Error reading RSSI: ", err);
+      //     });
+      //   });
+      // }, 1500);
+      
+      // setInterval(() => {
+      //   this.devicesSelected.forEach(device => {
+      //     this.ble.readRSSI(device.id).then(rssi => {
+      //       if (rssi > -70 || rssi > -60) { // Replace SOME_VALUE with the RSSI threshold
+      //         console.log("Alert");
+      //         alert('Alerta de proximidade com o dispositivo ' + device.name)
+      //         this.scanDevicesError = 'Alerta de proximidade com o dispositivo ' + device.name;
+      //       }
+      //     }).catch(err => {
+      //       console.log("Error reading RSSI: ", err);
+      //       this.scanDevicesError = 'Erro ao escanear dispositivos: ' + err.message;
+      //     });
+      //   });
+      // }, 1500);
+
+      setInterval(() => {
+        // this.scanForDevices();
+        // this.activateBluetooth();
+        this.devices.forEach(device => {
+          this.devicesSelected.forEach(deviceS => {
+            if (device.rssi != deviceS.rssi){
+              this.devicesSelected.pop();
+              this.devicesSelected.push(deviceS);
+            } else {
+              this.scanDevicesError = 'device.rssi == deviceS.rss ' + deviceS.rssi + ' == ' + device.rssi;
+            }
+            if (deviceS.rssi < -70 || deviceS.rssi < -60) { // Replace SOME_VALUE with the RSSI threshold
+              console.log("Alert of proximity", deviceS.name);
+              // alert('Alerta de proximidade com o dispositivo ' + device.name)
+              this.scanDevicesError = 'Alerta de proximidade com o dispositivo ' + deviceS.name;
+            } else {
+              console.log("No alert of proximity", deviceS.name);
+              this.scanDevicesError = 'Nenhum alerta de proximidade com o dispositivo ' + deviceS.name;
+            }
+        });
+      })   
+      }, 4500);
+      
     }
 
   activateBluetoothError: string = '';
@@ -28,6 +85,10 @@ export class EpiPage implements OnInit {
   devices: any[] = [];
 
   ngOnInit() {
+  }
+
+  isDeviceSelected(deviceId: string): boolean {
+    return this.devicesSelected.some(device => device.id === deviceId);
   }
 
   selectedDiv: string = '';
@@ -52,11 +113,18 @@ export class EpiPage implements OnInit {
   }
 
   scanForDevices() {
-    this.devices = []; // Limpa a lista de dispositivos antes de escanear novamente
+    this.devices = [{name: 'Beacon A', id: '00:00:00:00:00:0A', rssi: '-50'}, {name: 'Beacon B', id: '00:00:00:00:00:0B', rssi: '-60'}, {name: 'Beacon C', id: '00:00:00:00:00:0C', rssi: '-70'}];
+    // this.devices = []; // Limpa a lista de dispositivos antes de escanear novamente
     this.ble.scan([], 5).subscribe(device => {
       console.log(device);
       this.devices.push(device);
     });
+  }
+
+  selectDevice(device: any) 
+  {
+    this.devicesSelected.push(device);
+    console.log(this.devicesSelected);
   }
 
   connect(address:any){
