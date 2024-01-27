@@ -167,3 +167,12 @@
     justify-content: flex-start;
     align-items: center;
   }
+
+  .center_buttons_scan {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-content: center;
+    justify-content: flex-start;
+    align-items: center;
+  }

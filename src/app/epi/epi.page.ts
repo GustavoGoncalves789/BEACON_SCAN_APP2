@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { BluetoothSerial } from '@awesome-cordova-plugins/bluetooth-serial/ngx';
 import { BLE } from '@ionic-native/ble/ngx';
 import { AlertController, MenuController, NavController } from '@ionic/angular';
-// import { SpeechRecognition } from '@ionic-native/speech-recognition/ngx';
-
+import { BleSimulationService } from '../mock_ble/ble-simulation.service';
+import { Platform } from '@ionic/angular';
 
 @Component({
   selector: 'app-epi',
@@ -11,88 +11,110 @@ import { AlertController, MenuController, NavController } from '@ionic/angular';
   styleUrls: ['./epi.page.scss'],
 })
 export class EpiPage implements OnInit {
-
   devicesSelected: any[] = [];
+  isScanning: boolean = false;
+  scanInterval: any;
 
   constructor(
-    private menu : MenuController,
-    private navCtrl : NavController,
+    private menu: MenuController,
+    private navCtrl: NavController,
     private bluetoothSerial: BluetoothSerial,
     private ble: BLE,
-    private alertContrl : AlertController,
-    // private speechRecognition: SpeechRecognition,
-    ) 
-    {
-      this.selectedDiv = 'NerBy';
-      this.buttonsBottom = 'Scanner';
+    private alertContrl: AlertController,
+    private bleSimulationService: BleSimulationService,
+    private platform: Platform
+  ) {
+    this.selectedDiv = 'NerBy';
+    this.buttonsBottom = 'Scanner';
 
-
-      // setInterval(() => {
-      //   this.devicesSelected.forEach(device => {
-      //     this.ble.readRSSI(device.id).then(rssi => {
-      //       if (rssi > -70 || rssi > -60) { // Replace SOME_VALUE with the RSSI threshold
-      //         console.log("Alert");
-      //         alert('Alerta de proximidade com o dispositivo ' + device.name)
-      //       }
-      //     }).catch(err => {
-      //       console.log("Error reading RSSI: ", err);
-      //     });
-      //   });
-      // }, 1500);
-      
-      // setInterval(() => {
-      //   this.devicesSelected.forEach(device => {
-      //     this.ble.readRSSI(device.id).then(rssi => {
-      //       if (rssi > -70 || rssi > -60) { // Replace SOME_VALUE with the RSSI threshold
-      //         console.log("Alert");
-      //         alert('Alerta de proximidade com o dispositivo ' + device.name)
-      //         this.scanDevicesError = 'Alerta de proximidade com o dispositivo ' + device.name;
-      //       }
-      //     }).catch(err => {
-      //       console.log("Error reading RSSI: ", err);
-      //       this.scanDevicesError = 'Erro ao escanear dispositivos: ' + err.message;
-      //     });
-      //   });
-      // }, 1500);
-
-      setInterval(() => {
-        // this.scanForDevices();
-        // this.activateBluetooth();
-        this.devices.forEach(device => {
-          this.devicesSelected.forEach(deviceS => {
-            if (device.rssi != deviceS.rssi){
-              this.devicesSelected.pop();
-              this.devicesSelected.push(deviceS);
-            } else {
-              this.scanDevicesError = 'device.rssi == deviceS.rss ' + deviceS.rssi + ' == ' + device.rssi;
-            }
-            if (deviceS.rssi < -70 || deviceS.rssi < -60) { // Replace SOME_VALUE with the RSSI threshold
-              console.log("Alert of proximity", deviceS.name);
-              // alert('Alerta de proximidade com o dispositivo ' + device.name)
-              this.scanDevicesError = 'Alerta de proximidade com o dispositivo ' + deviceS.name;
-            } else {
-              console.log("No alert of proximity", deviceS.name);
-              this.scanDevicesError = 'Nenhum alerta de proximidade com o dispositivo ' + deviceS.name;
-            }
-        });
-      })   
-      }, 4500);
-      
-    }
+    this.ngOnInit();
+    // // Manually start simulation when the page initializes
+    this.bleSimulationService.startSimulation();
+  }
 
   activateBluetoothError: string = '';
   scanDevicesError: string = '';
   devices: any[] = [];
+  platform_is: string = '';
 
   ngOnInit() {
+    if (this.platform.is('android')) {
+      console.log('Running on Android');
+      this.platform_is = 'ANDROID';
+    } else if (this.platform.is('ios')) {
+      console.log('Running on iOS');
+      this.platform_is = 'IOS';
+    } else {
+      console.log('Running on another platform');
+      this.platform_is = 'OTHER';
+    }
   }
 
   isDeviceSelected(deviceId: string): boolean {
     return this.devicesSelected.some(device => device.id === deviceId);
   }
 
+  async toggleScan() {
+    if (this.isScanning) {
+      clearInterval(this.scanInterval);
+      this.isScanning = false;
+      this.scanDevicesError = 'Scanning stopped';
+      console.log('Scanning stopped');
+    } else {
+      this.scanInterval = setInterval(() => {
+        this.compareDevices();
+        this.activateBluetooth();
+        this.scanDevicesError = `Scanning started ${this.getTimestamp()}`;
+      }, 10000);
+      this.isScanning = true;
+      console.log('Scanning started');
+    }
+  }
+
+  updatedDevicesSelected: any[] = [];
+  logCompareDevices: string = '';
+
+  compareDevices() {
+    this.scanForDevices().then(() => {
+      this.updatedDevicesSelected = [];
+
+      this.updatedDevicesSelected = this.devicesSelected.filter(deviceS =>
+        this.devices.some(device => device.rssi === deviceS.rssi)
+      );
+
+      this.devices.forEach(device => {
+        const matchingDevice = this.devicesSelected.find(deviceS => deviceS.rssi === device.rssi);
+
+        this.logCompareDevices = '';
+        this.scanDevicesError = '';
+
+        if (!matchingDevice) {
+          this.logCompareDevices = `${this.getTimestamp()} - Added device: ${device.name}`;
+          this.updatedDevicesSelected.push(device);
+          this.scanDevicesError = `${this.getTimestamp()} - Added device: ${device.name}`;
+        } else {
+          this.scanDevicesError = `${this.getTimestamp()} - Device already exists: ${device.name}`;
+        }
+
+        if (device.rssi < -70 || device.rssi < -60) {
+          console.log(`${this.getTimestamp()} - Alert of proximity: ${device.name}, rssi: ${device.rssi}`);
+          this.logCompareDevices = `${this.getTimestamp()} - Alert of proximity: ${device.name}, rssi: ${device.rssi}`;
+          this.scanDevicesError = `${this.getTimestamp()} - Alerta de proximidade com o dispositivo ${device.name}, rssi: ${device.rssi}`;
+        } else {
+          console.log(`${this.getTimestamp()} - No alert of proximity: ${device.name}, rssi: ${device.rssi}`);
+          this.logCompareDevices = `${this.getTimestamp()} - No alert of proximity: ${device.name}, rssi: ${device.rssi}`;
+          this.scanDevicesError = `${this.getTimestamp()} - Nenhum alerta de proximidade com o dispositivo ${device.name}, rssi: ${device.rssi}`;
+        }
+      });
+
+      this.devicesSelected = this.updatedDevicesSelected;
+    }).catch(error => {
+      console.error(`${this.getTimestamp()} - Error during scanning:`, error);
+    });
+  }
+
   selectedDiv: string = '';
-  buttonsBottom: string = '';  
+  buttonsBottom: string = '';
 
   selectDiv(divName: string) {
     this.selectedDiv = divName;
@@ -103,31 +125,62 @@ export class EpiPage implements OnInit {
     this.buttonsBottom = buttonName;
     console.log(this.buttonsBottom)
     if (this.buttonsBottom == 'Peripheral') {
-      this.navCtrl.navigateForward('radar-ble')
+      this.navCtrl.navigateForward('radar-ble');
     }
   }
 
-  disconnected(){
-    this.bluetoothSerial.disconnect()
-    console.log('Dispositivo desconectado')
+  disconnected() {
+    this.bluetoothSerial.disconnect();
+    console.log('Dispositivo desconectado');
   }
 
-  scanForDevices() {
-    this.devices = [{name: 'Beacon A', id: '00:00:00:00:00:0A', rssi: '-50'}, {name: 'Beacon B', id: '00:00:00:00:00:0B', rssi: '-60'}, {name: 'Beacon C', id: '00:00:00:00:00:0C', rssi: '-70'}];
-    // this.devices = []; // Limpa a lista de dispositivos antes de escanear novamente
-    this.ble.scan([], 5).subscribe(device => {
-      console.log(device);
-      this.devices.push(device);
+  scanForDevices(): Promise<any> {
+    return new Promise<void>((resolve, reject) => {
+      if (this.platform_is == 'ANDROID' || this.platform_is == 'IOS') {
+        this.devices = [];
+        this.ble.scan([], 5).subscribe(
+          device => {
+            console.log(device);
+            this.devices.push(device);
+          },
+          error => {
+            this.scanDevicesError = 'Erro ao escanear dispositivos: ' + error;
+            reject(error);
+          },
+          () => {
+            resolve();
+          }
+        );
+      } else {
+        console.log('Simulating BLE scan');
+        console.log(this.platform_is);
+        this.devices = [];
+        this.bleSimulationService.getDevices().subscribe(
+          (simulatedDevices) => {
+            this.devices = simulatedDevices;
+            console.log(this.devices);
+            resolve();
+          },
+          (error) => {
+            console.error('Error getting simulated devices:', error);
+            reject(error);
+          }
+        );
+      }
     });
   }
 
-  selectDevice(device: any) 
-  {
+  getTimestamp(): string {
+    const now = new Date();
+    return `${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
+  }
+
+  selectDevice(device: any) {
     this.devicesSelected.push(device);
     console.log(this.devicesSelected);
   }
 
-  connect(address:any){
+  connect(address: any) {
     this.bluetoothSerial.connect(address).subscribe(successs => {
       this.deviceConnected()
     }, error => {
@@ -144,7 +197,7 @@ export class EpiPage implements OnInit {
     })
   }
 
-  async isEnabled(msg:any) {
+  async isEnabled(msg: any) {
     const alert = await this.alertContrl.create({
       header: 'Alerta',
       message: msg,
@@ -154,16 +207,16 @@ export class EpiPage implements OnInit {
           console.log('Okay')
         }
       }]
-    })
+    });
   }
 
-  deviceConnected(){
-    this.bluetoothSerial.subscribe('/n').subscribe(success =>{
+  deviceConnected() {
+    this.bluetoothSerial.subscribe('/n').subscribe(success => {
       this.handler(success)
     })
   }
 
-  handler(value:any){
+  handler(value: any) {
     console.log(value)
   }
 
@@ -172,7 +225,7 @@ export class EpiPage implements OnInit {
     console.log('Menu aberto')
   }
 
-  navigate_to_home(){
+  navigate_to_home() {
     this.navCtrl.navigateForward('home')
   }
 
@@ -182,11 +235,9 @@ export class EpiPage implements OnInit {
 
   navRadarBLE() {
     this.navCtrl.navigateForward('radar-ble')
-    
   }
 
   navEPIPage() {
     this.navCtrl.navigateForward('epi')
   }
-
 }

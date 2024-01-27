@@ -74,9 +74,14 @@
   -->
   
   <div class="center-content" id="main-content">
-    <ion-button (click)="activateBluetooth()">Ativar Bluetooth</ion-button>
-    <ion-button (click)="scanForDevices()">Scan for Devices</ion-button>
-  
+    <div class="center_buttons_scan">
+      <ion-button (click)="activateBluetooth()">Ativar Bluetooth</ion-button>
+      <ion-button [color]="isScanning ? 'success' : 'primary'" (click)="toggleScan()">
+        Scan for Devices
+        <ion-icon [color]="isScanning ? 'light' : 'primary'" size="" slot="end" name="wifi"></ion-icon>
+      </ion-button>
+      
+    </div>
   
     <!-- <h2>Função activateBluetooth</h2> -->
     <div *ngFor="let device of devices">
@@ -92,12 +97,23 @@
     </div>
   
     <h2 *ngIf="devicesSelected.length > 0">Devices Selected</h2>
-    <ion-list>
+    <!-- <ion-list>
       <ion-item *ngFor="let device of devicesSelected">
         <ion-label>{{ device.name || 'Unnamed Device' }}</ion-label>
         <ion-label>{{ device.rssi || 'RSSI fora de alcanse' }}</ion-label>
       </ion-item>
-    </ion-list>
+    </ion-list> -->
+    <div *ngFor="let device of devicesSelected">
+      <h3>{{ device.name }}</h3>
+      <p>{{ device.id }}</p>
+      <p>RSSI: {{ device.rssi }}</p>
+    </div>
+    
+    <div *ngFor="let device of updatedDevicesSelected">
+      <h3>{{ device.name }}</h3>
+      <p>{{ device.id }}</p>
+      <p>RSSI: {{ device.rssi }}</p>
+    </div>
     
     <div *ngIf="devices.length === 0">
       <p>Nenhum aparelho ao alcance...</p>
@@ -105,6 +121,7 @@
     
     <p>{{ activateBluetoothError }}</p>
     <p>{{ scanDevicesError }}</p>
+    <p>{{ logCompareDevices }}</p>
     
   </div>
 </ion-content>
