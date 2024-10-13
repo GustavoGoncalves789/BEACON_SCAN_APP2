@@ -1,0 +1,4 @@
+header: (when refactor rename)
+
+xmlns:tools="http://schemas.android.com/tools"
+  package="io.ionic.BLE">

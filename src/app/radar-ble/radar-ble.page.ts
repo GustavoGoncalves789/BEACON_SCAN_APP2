@@ -1,19 +1,19 @@
-import { Component, NgZone, OnInit, ViewChild, ElementRef, AfterViewInit, ViewChildren, TemplateRef, numberAttribute } from '@angular/core';
+import { Component, ViewChild, ElementRef, TemplateRef } from '@angular/core';
 import { IonInput, MenuController, NavController } from '@ionic/angular';
 
 import { BluetoothSerial } from '@awesome-cordova-plugins/bluetooth-serial/ngx';
 import { AlertController } from '@ionic/angular';
 //import { error } from 'console';
 import { BLE } from '@ionic-native/ble/ngx';
-import { BluetoothLE, InitParams, Device, ScanStatus } from '@awesome-cordova-plugins/bluetooth-le/ngx';
+// import { BluetoothLE, InitParams, Device, ScanStatus } from '@awesome-cordova-plugins/bluetooth-le/ngx';
 import { Geolocation } from '@capacitor/geolocation';
-import { filter, identity } from 'rxjs';
-import { SensorService } from '../sensor.service';
+// import { filter, identity } from 'rxjs';
+// import { SensorService } from '../sensor.service';
 import { DeviceMotion, DeviceMotionAccelerationData } from '@ionic-native/device-motion/ngx';
 //import { Gyroscope } from 'ionic-native';
 import { Gyroscope, GyroscopeOrientation, GyroscopeOptions } from '@ionic-native/gyroscope/ngx';
 // import { log } from 'console';
-
+// import { BleSimulationService } from '../mock_ble/ble-simulation.service'
 
 
 
@@ -57,7 +57,7 @@ export class RadarBlePage {
     // private sensorService: SensorService,
     private deviceMotion: DeviceMotion,
     private menu: MenuController,
-    private gyroscope: Gyroscope
+    private gyroscope: Gyroscope,
     ) { 
 
       this.selectedDiv = 'NerBy';
@@ -371,10 +371,12 @@ export class RadarBlePage {
             y_axis: y_axis.Y_Axis,
             z_axis: z_axis.Z_Axis,
             MacAddress : MacAddress.MacAddress,
+            Debug: device.advertising
             // comma_count: comma_count,
             // advertisingDataParsed: dataNumbersParse,
   
           };
+          this.advertisingDataParsed = JSON.stringify(device.advertising)
           this.devices.push(convertedDevice);
         }
         else {
@@ -414,6 +416,9 @@ export class RadarBlePage {
           // advertisingDataParsed: dataNumbersParse,
 
         };
+        this.ADV1 = JSON.stringify(this.convertArrayBufferToObject(device.advertising),null,2);
+        this.ADV2 = this.arrayBufferToHex(device.advertising);
+        // this.ADV2 = this.convertAdvertisingData(device.advertising);
         this.devices.push(convertedDevice);
         console.log("else scanForDevices()")
         //this.updateDeviceIds(); // Atualiza a lista de IDs após adicionar um dispositivo
@@ -429,6 +434,8 @@ export class RadarBlePage {
   getUint16_value16: string = "";
   getUint8_value17: string = "";
   calc: string = "";
+  ADV1: string = "";
+  ADV2: string = "";
 
 //   getAdvertasing_X_axis(data: ArrayBuffer): { X_Axis: number } {
 //     const dataView = new DataView(data);
@@ -463,6 +470,22 @@ export class RadarBlePage {
   //   return scaledValue;
   // }
 
+  arrayBufferToHex(buffer: ArrayBuffer) {
+    const byteArray = new Uint8Array(buffer);
+    return Array.from(byteArray)
+        .map(byte => byte.toString(16).padStart(2, '0')) // Converte cada byte para hexadecimal
+        .join(''); // Junta os bytes com um espaço
+  }
+
+  convertArrayBufferToObject(data: ArrayBuffer): any {
+    const dataView = new DataView(data);
+    const result = {
+      batteryVoltage: (dataView.getUint8(22) * 256) + dataView.getUint8(23),
+      batteryVoltage2: (dataView.getUint8(0) * 256) + dataView.getUint8(1),
+      // Adicione outras informações conforme necessário
+    };
+    return result;
+  }
 
   getAdvertasing_X_axis(data: ArrayBuffer): { X_Axis: Number }{
 

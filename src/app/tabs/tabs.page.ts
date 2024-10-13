@@ -1,11 +1,12 @@
 import { Component, NgZone, OnInit, ViewChild,  ElementRef, AfterViewInit, Renderer2  } from '@angular/core';
-import { MenuController, NavController } from '@ionic/angular';
+import { MenuController, NavController, Platform  } from '@ionic/angular';
 
 import { BluetoothSerial } from '@awesome-cordova-plugins/bluetooth-serial/ngx';
 import { AlertController } from '@ionic/angular';
 //import { error } from 'console';
 import { BLE } from '@ionic-native/ble/ngx';
 import { BluetoothLE, InitParams, Device, ScanStatus } from '@awesome-cordova-plugins/bluetooth-le/ngx';
+import { BleSimulationService } from '../mock_ble/ble-simulation.service'
 
 
 @Component({
@@ -26,10 +27,10 @@ export class TabsPage {
     private bluetoothSerial: BluetoothSerial,
     private alertContrl : AlertController,
     //private bluetoothLE : BluetoothLE,
-    private ngZone : NgZone,
     private ble: BLE,
-    private renderer: Renderer2,
-    private menu: MenuController
+    private menu: MenuController,
+    private MockBle : BleSimulationService,
+    private platform: Platform
     ) {
       this.selectedDiv = 'NerBy';
       this.buttonsBottom = 'Scanner';
@@ -93,12 +94,24 @@ export class TabsPage {
     console.log('Dispositivo desconectado')
   }
 
-  scanForDevices() {
+  async scanForDevices() {
     this.devices = []; // Limpa a lista de dispositivos antes de escanear novamente
-    this.ble.scan([], 5).subscribe(device => {
-      console.log(device);
-      this.devices.push(device);
-    });
+    if (this.platform.is('desktop') || !this.platform.is('android')) {
+      console.log('Executando MockBle...');
+      this.MockBle.startSimulation();
+
+      this.MockBle.getDevices().subscribe(simulatedDevices => {
+        console.log('Dispositivos simulados:', simulatedDevices);
+        this.devices = simulatedDevices; // Armazena na lista de dispositivos
+      });
+    }
+    else {
+      this.ble.scan([], 5).subscribe(device => {
+        console.log(device);
+        this.devices.push(device);
+      });
+
+    }
   }
 
 

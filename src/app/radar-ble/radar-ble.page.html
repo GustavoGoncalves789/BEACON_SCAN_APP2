@@ -77,6 +77,7 @@
       <!-- <p>X_Axis: {{ device.X_calculate }}</p> -->
       <p>Y_Axis: {{ device.y_axis | number:'1.2-2' }}</p>
       <p>Z_Axis: {{ device.z_axis | number:'1.2-2' }}</p>
+      <!-- <p>DEBUG (ADV): {{ device.Debug || 'Cannot find advertasing' }}</p> -->
       
     </div>
 
@@ -117,6 +118,9 @@
     <p>getUint8(16): {{ getUint16_value16 }}</p>
     <p>getUint8(17): {{ getUint8_value17 }}</p>
     <p>calc: {{ calc }}</p>
+    <pre>ADV1: {{ ADV1 }}</pre>
+    <textarea>ADV2: {{ ADV2 }}</textarea>
+    <!-- <p>ADV1: {{ ADV1 }}</p> -->
 
     <!-- <ion-list>
       <ion-item *ngFor="let log of logX_Y_X">
