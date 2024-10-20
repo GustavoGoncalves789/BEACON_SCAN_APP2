@@ -5,3 +5,5 @@ need JAVA11 JDK
 # local.properties
 
 sdk.dir=C:\\Users\\Gustavo-PC\\AppData\\Local\\Android\\Sdk
+
+Never forget to enable Debug USB!!

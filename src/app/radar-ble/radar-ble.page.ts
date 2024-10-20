@@ -12,10 +12,20 @@ import { Geolocation } from '@capacitor/geolocation';
 import { DeviceMotion, DeviceMotionAccelerationData } from '@ionic-native/device-motion/ngx';
 //import { Gyroscope } from 'ionic-native';
 import { Gyroscope, GyroscopeOrientation, GyroscopeOptions } from '@ionic-native/gyroscope/ngx';
+import { Buffer } from 'buffer';
+
 // import { log } from 'console';
 // import { BleSimulationService } from '../mock_ble/ble-simulation.service'
 
+interface ParsedPayload {
+  name?: string; // Optional because it may not always be present
+  macAddress?: string; // Optional because it depends on manufacturer data
+}
 
+interface NUSData {
+  command: string;
+  payload: string;
+}
 
 @Component({
   selector: 'app-radar-ble',
@@ -370,7 +380,7 @@ export class RadarBlePage {
             x_axis: x_axis.X_Axis,
             y_axis: y_axis.Y_Axis,
             z_axis: z_axis.Z_Axis,
-            MacAddress : MacAddress.MacAddress,
+            MacAddress : MacAddress,
             Debug: device.advertising
             // comma_count: comma_count,
             // advertisingDataParsed: dataNumbersParse,
@@ -395,6 +405,21 @@ export class RadarBlePage {
         let y_axis = this.getAdvertasing_Y_axis(device.advertising);
         let z_axis = this.getAdvertasing_Z_axis(device.advertising);
         let MacAddress = this.getAdvertisingMacAddress(device.advertising);
+        let DeviceName = this.getAdvertisingDeviceName(device.advertising);
+        let manufacturerData = this.getManufacturerData(device.advertising);
+        let { uuid, name } = this.getUUIDandNameFromAdvertising(device.advertising);
+        // let decodedData = this.decodeNUSData(device.advertising);
+
+        // discover payload
+        this.ADV1 = JSON.stringify(this.convertArrayBufferToObject(device.advertising),null,2);
+        this.ADV2 = this.arrayBufferToHex(device.advertising);
+        const parsedData = this.parseAdvertisingPayload(this.ADV2);  // Parse the hex payload
+        if (parsedData) {
+          console.log('Device Name:', parsedData.name ?? 'Unknown');
+          console.log('MAC Address:', parsedData.macAddress ?? 'Not available');
+        } else {
+          console.log('Failed to parse advertising data');
+        }
 
         // let comma_count = (String(convertedData).match(/ /g) || []).length;
         // const dataNumbersParse = this.advertisingDataParsed
@@ -411,13 +436,21 @@ export class RadarBlePage {
           // x_array32: x_axis.X_calculate,
           y_axis: y_axis.Y_Axis,
           z_axis: z_axis.Z_Axis,
-          MacAddress : MacAddress.MacAddress,
+          // MacAddress : MacAddress,
+          // Payload_Device_Name: parsedData?.name,
+          Payload_Device_Name: DeviceName,
+          Payload_Device_Mac: MacAddress,
+          Payload_manufacturerData: manufacturerData,
+          Payload_Uuid: uuid,
+          Payload_Uuid_Name: name,
+
           // comma_count: comma_count,
           // advertisingDataParsed: dataNumbersParse,
 
         };
-        this.ADV1 = JSON.stringify(this.convertArrayBufferToObject(device.advertising),null,2);
-        this.ADV2 = this.arrayBufferToHex(device.advertising);
+        
+        // const rawData = this.ble.encodedStringToBytes(device.advertisement);
+        // console.log('Raw bytes:', rawData);
         // this.ADV2 = this.convertAdvertisingData(device.advertising);
         this.devices.push(convertedDevice);
         console.log("else scanForDevices()")
@@ -437,38 +470,133 @@ export class RadarBlePage {
   ADV1: string = "";
   ADV2: string = "";
 
-//   getAdvertasing_X_axis(data: ArrayBuffer): { X_Axis: number } {
-//     const dataView = new DataView(data);
-
-//     // Extract X axis values from positions 16 and 17
-//     const xRawValue = (dataView.getUint8(16) << 8) | dataView.getUint8(17);
-
-//     this.logX = xRawValue.toString();
-
-//     // Convert X_Axis to a float and scale it down
-//     let X_Axis = xRawValue / 100.0;
-    
-//     this.logX2 = X_Axis.toFixed(2);
-
-//     // Check if the value is negative (using a 16-bit signed integer)
-//     if (xRawValue > 32767) {
-//         X_Axis = X_Axis - 655.36; // Subtracting 655.36 for negative values
-//     }
-    
-//     this.logX3 = X_Axis.toString();
-
-//     return { X_Axis };
-// }
-
-  // getUint8AsDouble(data: ArrayBuffer, position: number): number {
-  //   const dataView = new DataView(data);
-  //   const uint8Value = dataView.getUint8(position);
-
-  //   // Scale the Uint8 value to the desired range for your application
-  //   const scaledValue = uint8Value / 100.0; // This assumes you want a range between 0 and 1
-
-  //   return scaledValue;
+  // decodeNUSData(PayloadAdv: string): NUSData | null {
+  //   if (!PayloadAdv || PayloadAdv.length === 0) {
+  //     return null; // Retorna null se os dados não forem válidos
   // }
+
+  //   // Convertendo o hex string para byte array
+  //   const byteArray = new Uint8Array(PayloadAdv.match(/.{1,2}/g)!.map(byte => parseInt(byte, 16)));
+  //   const numberArray: number[] = Array.from(byteArray); // Converte Uint8Array para number[]
+
+  //   const command = String.fromCharCode.apply(null, numberArray);
+  //   const payload = numberArray.slice(1).map(b => String.fromCharCode(b)).join('');
+
+  //   return { command, payload };
+  // }
+
+  getUUIDandNameFromAdvertising(advertising: ArrayBuffer): { uuid: string | null, name: string | null } {
+    const data = new Uint8Array(advertising);
+  
+    let i = 0;
+    let uuid: string | null = null;
+    let name: string | null = null;
+  
+    while (i < data.length) {
+      const length = data[i];
+      if (length === 0) break; // End of data
+  
+      const type = data[i + 1];
+  
+      if (type === 0x07) { // Complete 128-bit UUID
+        uuid = Array.from(data.slice(i + 2, i + 1 + length))
+          .map(byte => byte.toString(16).padStart(2, '0'))
+          .join('');
+      } else if (type === 0x09) { // Complete Local Name
+        name = new TextDecoder().decode(data.slice(i + 2, i + 1 + length));
+      }
+  
+      i += length + 1;
+    }
+  
+    return { uuid, name };
+  }
+  
+
+  getAdvertisingDeviceName(advertising: ArrayBuffer): string | null {
+    const data = new Uint8Array(advertising);
+    
+    let i = 0;
+    while (i < data.length) {
+      const length = data[i]; // Length of this section (including type byte)
+      if (length === 0) break; // End of data
+  
+      const type = data[i + 1]; // Type of the section
+      if (type === 0x09 || type === 0x08) { // 0x09 = Complete Local Name, 0x08 = Shortened Name
+        const nameBytes = data.slice(i + 2, i + 1 + length);
+        return new TextDecoder().decode(nameBytes); // Convert to string
+      }
+      i += length + 1; // Move to the next section
+    }
+  
+    console.warn('Device name not found in advertising data.');
+    return null;
+  }
+
+  getManufacturerData(advertising: ArrayBuffer): string | null {
+    const data = new Uint8Array(advertising);
+  
+    let i = 0;
+    while (i < data.length) {
+      const length = data[i]; // Length of this section (including type byte)
+      if (length === 0) break; // End of data
+  
+      const type = data[i + 1]; // Type of the section
+      if (type === 0xFF) { // Manufacturer-specific data type
+        const manufacturerData = data.slice(i + 2, i + 1 + length);
+        return Array.from(manufacturerData, byte => byte.toString(16).padStart(2, '0')).join(' ');
+      }
+      i += length + 1; // Move to the next section
+    }
+  
+    console.warn('Manufacturer data not found in advertising data.');
+    return null;
+  }  
+
+  getAdvertisingMacAddress(advertising: ArrayBuffer): string | null { // not working...
+    const data = new Uint8Array(advertising);
+    // MAC addresses are usually 6 bytes long
+    // Adjust the offset if the MAC is stored in a different location
+    const macBytes = data.slice(7, 13); // Example: Adjust this based on payload structure
+  
+    if (macBytes.length !== 6) {
+      console.error('MAC address extraction failed. Invalid length.');
+      return null;
+    }
+  
+    // Convert bytes to MAC address format
+    const macAddress = Array.from(macBytes)
+      .map(byte => byte.toString(16).padStart(2, '0'))
+      .join(':');
+  
+    return macAddress;
+  }
+
+  // Extract specific fields from advertising payload
+  parseAdvertisingPayload(payloadHex: string): ParsedPayload | null {
+    if (!payloadHex) return null; // Handle empty or invalid input
+
+    let payload = Buffer.from(payloadHex, 'hex'); // Convert to byte array
+    let index = 0;
+    let result: ParsedPayload = {}; // Initialize with our defined type
+
+    while (index < payload.length) {
+      const length = payload[index];
+      const type = payload[index + 1];
+
+      if (type === 0x09) {  // Complete Local Name
+        result.name = payload.slice(index + 2, index + 1 + length).toString('ascii');
+      } else if (type === 0xFF) {  // Manufacturer Data (e.g., MAC address)
+        result.macAddress = payload
+          .slice(index + 2, index + 1 + length)
+          .toString('hex')
+          .match(/.{1,2}/g)?.join(':'); // Join bytes with ':' for MAC format
+      }
+      index += length + 1;
+    }
+
+    return result;
+  }
 
   arrayBufferToHex(buffer: ArrayBuffer) {
     const byteArray = new Uint8Array(buffer);
@@ -573,24 +701,24 @@ export class RadarBlePage {
 
   }
 
-  getAdvertisingMacAddress(data: ArrayBuffer): { MacAddress: string } {
-    const dataView = new DataView(data);
+//   getAdvertisingMacAddress(data: ArrayBuffer): { MacAddress: string } {
+//     const dataView = new DataView(data);
 
-    // Check if the advertising data has the necessary length
-    if (data.byteLength < 30) {
-        throw new Error('Invalid advertising data length');
-    }
+//     // Check if the advertising data has the necessary length
+//     if (data.byteLength < 30) {
+//         throw new Error('Invalid advertising data length');
+//     }
 
-    // Extract the MAC address bytes from positions 25-30
-    const macAddressBytes = new Uint8Array(data.slice(25, 31));
+//     // Extract the MAC address bytes from positions 25-30
+//     const macAddressBytes = new Uint8Array(data.slice(25, 31));
 
-    // Convert the MAC address bytes to a hexadecimal string
-    const macAddressHex = Array.from(macAddressBytes)
-        .map(byte => byte.toString(16).padStart(2, '0'))
-        .join(':');
+//     // Convert the MAC address bytes to a hexadecimal string
+//     const macAddressHex = Array.from(macAddressBytes)
+//         .map(byte => byte.toString(16).padStart(2, '0'))
+//         .join(':');
 
-    return { MacAddress: macAddressHex };
-}
+//     return { MacAddress: macAddressHex };
+// }
 
 
   batteryPorcentage_adv(data: ArrayBuffer): { batteryVoltage: number } {
